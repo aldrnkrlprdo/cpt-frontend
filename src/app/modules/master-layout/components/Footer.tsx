@@ -9,9 +9,9 @@ const Footer: React.FC = () => {
             © {new Date().getFullYear()} National Bookstore Cooperative
           </p>
           <div className="flex gap-4 text-sm text-gray-600">
-            <a href="#" className="hover:text-nbs-red">Terms</a>
-            <a href="#" className="hover:text-nbs-red">Privacy</a>
-            <a href="#" className="hover:text-nbs-red">Support</a>
+            <a href="/terms" className="hover:text-nbs-red">Terms</a>
+            <a href="/privacy" className="hover:text-nbs-red">Privacy</a>
+            <a href="/support" className="hover:text-nbs-red">Support</a>
           </div>
         </div>
       </div>
