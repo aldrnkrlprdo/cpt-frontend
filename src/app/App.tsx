@@ -4,8 +4,9 @@ import 'ag-grid-community/styles/ag-theme-balham.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import React, { Suspense } from 'react';
 import { BrowserRouter } from 'react-router-dom';
-// import AuthInit from './modules/auth/redux/AuthInit';
 import { Routes } from './setup/routing/Routes';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 type Props = {
   basename: string;
@@ -15,9 +16,8 @@ const App: React.FC<Props> = ({ basename }) => {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <BrowserRouter basename={basename}>
-        {/* <AuthInit> */}
         <Routes />
-        {/* </AuthInit> */}
+        <ToastContainer />
       </BrowserRouter>
     </Suspense>
   );

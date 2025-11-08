@@ -9,19 +9,12 @@ interface MasterLayoutProps {
 
 const MasterLayout: React.FC<MasterLayoutProps> = () => {
   return (
-    <div className="flex flex-col flex-1 text-center h-screen min-h-screen">
-      {/* Header */}
-      <header>
-        <Header />
-      </header>
-      {/* Main Content */}
-      <main>
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1">
         <Outlet />
       </main>
-      {/* Footer */}
-      <footer className="relative">
-        <Footer />
-      </footer>
+      <Footer />
     </div>
   );
 }

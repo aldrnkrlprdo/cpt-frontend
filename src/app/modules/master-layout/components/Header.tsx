@@ -1,21 +1,33 @@
-import React from 'react'
-import { shallowEqual, useSelector } from 'react-redux'
-import { RootState } from '../../../setup/redux/RootReducer'
-import { AuthState } from '../../login'
+import React from "react";
+import { Link } from "react-router-dom";
 
 const Header: React.FC = () => {
-    const { fullName } = useSelector<RootState>(({ auth }) => auth, shallowEqual) as AuthState
+  return (
+    <header className="h-16 bg-nbs-red text-white flex items-center px-4 shadow-sm">
+      <div className="flex items-center gap-4 w-full max-w-7xl mx-auto">
+        <Link to="/" className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-white rounded-sm flex items-center justify-center text-nbs-red font-bold">
+            NB
+          </div>
+          <div className="text-lg font-semibold">National Bookstore – CPT</div>
+        </Link>
 
-    return (
-        <div className="flex w-full h-full sticky shadow-sm">
-            <div className="h-20 flex flex-auto items-center mx-10">
-                <p className="text-5xl font-bold hover:cursor-pointer">Payment Tracker</p>
-            </div>
-            <div className="flex-none w-40 flex items-center justify-center">
-                <p className='hover:font-bold hover:cursor-pointer'>{fullName} &gt;</p>
-            </div>
-        </div>
-    )
-}
+        <nav className="ml-auto flex items-center gap-4">
+          <Link to="/" className="text-white hover:text-nbs-accent transition-colors">
+            Dashboard
+          </Link>
 
-export default Header
+          <Link to="/users" className="text-white hover:text-nbs-accent transition-colors">
+            Users
+          </Link>
+
+          <Link to="/payments" className="hidden md:inline text-white hover:text-nbs-accent transition-colors">
+            Payments
+          </Link>
+        </nav>
+      </div>
+    </header>
+  );
+};
+
+export default Header;

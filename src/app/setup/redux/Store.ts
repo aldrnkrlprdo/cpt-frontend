@@ -4,6 +4,7 @@ import { reduxBatch } from '@manaflair/redux-batch';
 import { persistStore } from 'redux-persist';
 import { rootReducer } from './RootReducer';
 import { rootSaga } from './RootSaga';
+import { tokenMiddleware } from '../../core/middleware/tokenMiddleware';
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -16,7 +17,8 @@ const store = configureStore({
         immutableCheck: false,
         thunk: true,
       }),
-      sagaMiddleware
+      sagaMiddleware,
+      tokenMiddleware
     ),
   enhancers: (getDefaultEnhancers) =>
     new Tuple(
