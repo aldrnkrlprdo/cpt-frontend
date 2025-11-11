@@ -41,10 +41,6 @@ const Register: React.FC = () => {
                     username: username.trim(),
                     email: email.trim(),
                     password
-                },
-                {
-                    headers: { "Content-Type": "application/json" },
-                    signal: controller.signal
                 }
             );
 
