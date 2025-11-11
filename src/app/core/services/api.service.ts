@@ -2,11 +2,15 @@ import axios from 'axios';
 
 const API_BASE_URL = `${process.env.REACT_APP_BASE_API_URL}`;
 
+const controller = new AbortController();
+
 export const api = axios.create({
     baseURL: API_BASE_URL,
     headers: {
         'Content-Type': 'application/json'
-    }
+    },
+    signal: controller.signal,
+    withCredentials: true
 });
 
 // Add request interceptor to inject auth token

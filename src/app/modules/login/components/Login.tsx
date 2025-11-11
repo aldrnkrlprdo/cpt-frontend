@@ -36,11 +36,7 @@ const Login: React.FC = () => {
     try {
       const resp = await axios.post(
         LOGIN_URL,
-        { username: username.trim(), password },
-        {
-          headers: { "Content-Type": "application/json" },
-          signal: controller.signal
-        }
+        { username: username.trim(), password }
       );
 
       const data = resp?.data ?? {};
