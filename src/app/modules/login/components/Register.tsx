@@ -12,6 +12,8 @@ const Register: React.FC = () => {
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [confirmPassword, setConfirmPassword] = useState<string>("");
+    const [role, setRole] = useState<string>("user"); // added
+    const [status, setStatus] = useState<string>("active"); // added
     const [loading, setLoading] = useState<boolean>(false);
 
     const navigate = useNavigate();
@@ -40,7 +42,13 @@ const Register: React.FC = () => {
                     lastName: lastName.trim(),
                     username: username.trim(),
                     email: email.trim(),
-                    password
+                    password,
+                    role,    // included
+                    status   // included
+                },
+                {
+                    signal: controller.signal,
+                    headers: { "Content-Type": "application/json" }
                 }
             );
 
@@ -71,8 +79,8 @@ const Register: React.FC = () => {
 
                 <form onSubmit={handleRegister} className="space-y-3">
                     <div className="grid grid-cols-2 gap-3">
-                        <input className="nbs-input" placeholder="First name" value={firstName} onChange={e => setFirstName(e.target.value)} />
-                        <input className="nbs-input" placeholder="Last name" value={lastName} onChange={e => setLastName(e.target.value)} />
+                        <input className="nbs-input" placeholder="First name" value={firstName} onChange={e => setFirstName(e.target.value)} required />
+                        <input className="nbs-input" placeholder="Last name" value={lastName} onChange={e => setLastName(e.target.value)} required />
                     </div>
 
                     <div>
@@ -80,7 +88,7 @@ const Register: React.FC = () => {
                     </div>
 
                     <div>
-                        <input type="email" className="nbs-input" placeholder="Email (optional)" value={email} onChange={e => setEmail(e.target.value)} />
+                        <input type="email" className="nbs-input" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
                     </div>
 
                     <div>
@@ -89,6 +97,25 @@ const Register: React.FC = () => {
 
                     <div>
                         <input type="password" className="nbs-input" placeholder="Confirm password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required />
+                    </div>
+
+                    {/* Role and Status fields */}
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Role</label>
+                            <select className="nbs-input" value={role} onChange={e => setRole(e.target.value)} aria-label="Role">
+                                <option value="user">User</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Status</label>
+                            <select className="nbs-input" value={status} onChange={e => setStatus(e.target.value)} aria-label="Status">
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div className="flex justify-end gap-2 mt-4">
