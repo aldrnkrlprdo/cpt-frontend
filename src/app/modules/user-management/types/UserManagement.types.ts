@@ -1,9 +1,13 @@
+export type UserRole = 'user' | 'admin';
+export type UserStatus = 'active' | 'inactive';
+
 export interface User {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    role: 'admin' | 'member';
-    status: 'active' | 'inactive';
-    dateCreated: string;
+  id: string;
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+  role: UserRole;
+  status: UserStatus;
+  dateCreated: string;
 }
