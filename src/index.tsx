@@ -7,6 +7,18 @@ import { Provider } from 'react-redux';
 import store, { persistor } from './app/setup/redux/Store';
 import { PersistGate } from 'redux-persist/integration/react';
 
+import { ModuleRegistry, AllCommunityModule, provideGlobalGridOptions } from "ag-grid-community";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+
+// Register all Community features
+ModuleRegistry.registerModules([AllCommunityModule]);
+
+// Mark all grids as using legacy themes
+provideGlobalGridOptions({
+    theme: "legacy",
+});
+
 const { PUBLIC_URL } = process.env;
 
 const element = document.getElementById('root');
