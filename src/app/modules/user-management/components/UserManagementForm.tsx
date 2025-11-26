@@ -69,7 +69,7 @@ const UserManagementForm: React.FC<Props> = ({ user, onSubmit, onClose, loading 
 
           <div>
             <label className="block text-sm mb-1">Email</label>
-            <input name="email" type="email" value={form.email} onChange={handleChange} className="nbs-input" />
+            <input name="email" type="email" value={form.email} onChange={handleChange} className="nbs-input" required/>
           </div>
 
           <div>
