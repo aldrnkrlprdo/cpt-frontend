@@ -37,7 +37,7 @@ const UserManagement: React.FC = () => {
         { field: 'email', headerName: 'Email', sortable: true, filter: true },
         { field: 'role', headerName: 'Role', sortable: true, filter: true },
         { field: 'status', headerName: 'Status', sortable: true, filter: true },
-        { field: 'dateCreated', headerName: 'Date Created', sortable: true, filter: true },
+        { field: 'createdAt', headerName: 'Date Created', sortable: true, filter: true },
         {
             headerName: 'Actions',
             cellRenderer: (params: any) => (
