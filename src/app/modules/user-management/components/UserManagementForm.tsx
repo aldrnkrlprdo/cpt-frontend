@@ -8,24 +8,25 @@ interface Props {
   loading?: boolean;
 }
 
-const roleOptions: UserRole[] = ['user', 'admin'];
-const statusOptions: UserStatus[] = ['active', 'inactive'];
+const roleOptions: UserRole[] = ['User', 'Admin'];
+const statusOptions: UserStatus[] = ['Active', 'Inactive'];
 
 const UserManagementForm: React.FC<Props> = ({ user, onSubmit, onClose, loading = false }) => {
   const [form, setForm] = useState<Omit<User, 'id' | 'dateCreated'>>({
     firstName: '',
     lastName: '',
-    username: '',
+    username: '', // added
     email: '',
-    role: 'user',
-    status: 'active'
+    role: 'User',
+    status: 'Active'
   });
+
   useEffect(() => {
     if (user) {
       setForm({
         firstName: user.firstName,
         lastName: user.lastName,
-        username: user.username,
+        username: user.username, // added
         email: user.email,
         role: user.role,
         status: user.status
@@ -34,10 +35,10 @@ const UserManagementForm: React.FC<Props> = ({ user, onSubmit, onClose, loading 
       setForm({
         firstName: '',
         lastName: '',
-        username: '',
+        username: '', // added
         email: '',
-        role: 'user',
-        status: 'active'
+        role: 'User',
+        status: 'Active'
       });
     }
   }, [user]);
@@ -57,33 +58,44 @@ const UserManagementForm: React.FC<Props> = ({ user, onSubmit, onClose, loading 
       <div className="bg-white p-6 rounded-lg w-full max-w-md">
         <h2 className="text-xl font-bold mb-4">{user ? 'Edit User' : 'Add New User'}</h2>
         <form onSubmit={handleSubmit} className="space-y-3">
-          <div>
-            <label className="block text-sm mb-1">First Name</label>
-            <input name="firstName" value={form.firstName} onChange={handleChange} className="nbs-input" required />
+          <div className="grid grid-cols-2 gap-3">
+            <input name="firstName" value={form.firstName} onChange={handleChange} className="nbs-input" placeholder="First name" required />
+            <input name="lastName" value={form.lastName} onChange={handleChange} className="nbs-input" placeholder="Last name" required />
           </div>
 
+          {/* added username field */}
           <div>
-            <label className="block text-sm mb-1">Last Name</label>
-            <input name="lastName" value={form.lastName} onChange={handleChange} className="nbs-input" required />
+            <label className="block text-sm mb-1">Username</label>
+            <input name="username" value={form.username} onChange={handleChange} className="nbs-input" placeholder="Username" required />
           </div>
 
           <div>
             <label className="block text-sm mb-1">Email</label>
-            <input name="email" type="email" value={form.email} onChange={handleChange} className="nbs-input" required/>
+            <input name="email" type="email" value={form.email} onChange={handleChange} className="nbs-input" />
           </div>
 
-          <div>
-            <label className="block text-sm mb-1">Role</label>
-            <select name="role" value={form.role} onChange={handleChange} className="nbs-input">
-              {roleOptions.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
-            </select>
-          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm mb-1">Role</label>
+              <select name="role" value={form.role} onChange={handleChange} className="nbs-input">
+                {
+                  roleOptions.map((i) => (
+                    <option key={i} value={i.toLowerCase()}>{i}</option>
+                  ))
+                }
+              </select>
+            </div>
 
-          <div>
-            <label className="block text-sm mb-1">Status</label>
-            <select name="status" value={form.status} onChange={handleChange} className="nbs-input">
-              {statusOptions.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
-            </select>
+            <div>
+              <label className="block text-sm mb-1">Status</label>
+              <select name="status" value={form.status} onChange={handleChange} className="nbs-input">
+                {
+                  statusOptions.map((i) => (
+                    <option key={i} value={i.toLowerCase()}>{i}</option>
+                  ))
+                }
+              </select>
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 mt-4">

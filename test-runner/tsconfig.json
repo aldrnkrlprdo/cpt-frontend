@@ -1,0 +1,25 @@
+
+{
+  "compilerOptions": {
+    "target": "ES2019",
+    "module": "CommonJS",
+    "jsx": "react-jsx",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "types": [
+      "jest",
+      "node"
+    ],
+    "outDir": "./build",
+    "rootDir": "../"
+  },
+  "include": [
+    "../src/**/*.ts",
+    "../src/**/*.tsx",
+    "./**/*.ts"
+  ]
+}

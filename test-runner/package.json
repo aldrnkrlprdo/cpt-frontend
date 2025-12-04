@@ -1,0 +1,22 @@
+
+{
+  "name": "cpt-frontend-tests",
+  "private": true,
+  "version": "1.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "test": "jest --config ./jest.config.cjs --runInBand",
+    "test:watch": "jest --config ./jest.config.cjs --watch",
+    "build:tests": "tsc --project ./tsconfig.json"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.4.2",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.4.5"
+  }
+}

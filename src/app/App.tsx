@@ -1,7 +1,6 @@
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
-import 'ag-grid-community/styles/ag-theme-quartz.css';
 import React, { Suspense } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { Routes } from './setup/routing/Routes';

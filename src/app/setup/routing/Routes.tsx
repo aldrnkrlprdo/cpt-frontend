@@ -6,34 +6,41 @@ import { RootState } from '../redux/RootReducer';
 
 const Login = React.lazy(() => import('../../modules/login/components/Login'));
 const Main = React.lazy(() => import('../../modules/main/components/Main'));
-const UsersManagement = React.lazy(() => import('../../modules/user-management/components/UserManagement'));
+const MemberManagement = React.lazy(() => import('../../modules/member-management/components/MemberManagement'));
 const Register = React.lazy(() => import('../../modules/login/components/Register'));
+const UserManagement = React.lazy(() => import('../../modules/user-management/components/UserManagement'));
+const Profile = React.lazy(() => import('../../modules/profile/components/Profile'));
 
 const Routes: React.FC = () => {
-    const isAuthorized = useSelector<RootState>(({ auth }) => auth.loggedIn, shallowEqual)
+    const isAuthorized = useSelector<RootState, boolean>(({ auth }) => auth.loggedIn, shallowEqual)
 
     return (
         <React.Suspense fallback={null}>
             <Switch>
-                {/* Public route - not wrapped by MasterLayout */}
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-
-                {/* Protected routes - wrapped by MasterLayout */}
                 {isAuthorized ? (
-                    <Route element={<MasterLayout />}>
-                        <Route path="/" element={<Main />} />
-                        <Route path="/users" element={<UsersManagement />} />
-                        {/* add other protected routes here as nested children */}
-                        <Route path="*" element={<Navigate to="/" replace />} />
-                    </Route>
+                    <>
+                        {/* Protected routes - wrapped by MasterLayout */}
+                        <Route element={<MasterLayout />}>
+                            <Route path="/" element={<Main />} />
+                            <Route path="/members" element={<MemberManagement />} />
+                            <Route path="/users" element={<UserManagement />} />
+                            <Route path="/profile" element={<Profile />} />
+                            {/* add other protected routes here as nested children */}
+                            <Route path="*" element={<Navigate to="/" replace />} />
+                        </Route>
+                    </>
                 ) : (
-                    /* redirect any non-login route to login when not authorized */
-                    <Route path="*" element={<Navigate to="/login" replace />} />
+                    <>
+                        {/* Public routes */}
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/register" element={<Register />} />
+                        {/* Redirect all other paths to login */}
+                        <Route path="*" element={<Navigate to="/login" replace />} />
+                    </>
                 )}
             </Switch>
         </React.Suspense>
     )
 }
 
-export { Routes };
+export { Routes }
