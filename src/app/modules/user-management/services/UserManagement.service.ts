@@ -1,24 +1,25 @@
 import { api } from '../../../core/services/api.service';
 import { User } from '../types/UserManagement.types';
 
+const BASE = '/users';
+
 export const UserManagementService = {
-    getUsers: async () => {
-        const response = await api.get('/users');
-        return response.data;
-    },
+  getUsers: async (): Promise<User[]> => {
+    const resp = await api.get(BASE);
+    return resp.data;
+  },
 
-    createUser: async (userData: Omit<User, 'id' | 'dateCreated'>) => {
-        const response = await api.post('/users', userData);
-        return response.data;
-    },
+  createUser: async (payload: Omit<User, 'id' | 'dateCreated'>): Promise<User> => {
+    const resp = await api.post(BASE, payload);
+    return resp.data;
+  },
 
-    updateUser: async (id: string, userData: Partial<User>) => {
-        const response = await api.put(`/users/${id}`, userData);
-        return response.data;
-    },
+  updateUser: async (id: string, payload: Partial<User>): Promise<User> => {
+    const resp = await api.put(`${BASE}/${id}`, payload);
+    return resp.data;
+  },
 
-    deleteUser: async (id: string) => {
-        const response = await api.delete(`/users/${id}`);
-        return response.data;
-    }
+  deleteUser: async (id: string): Promise<void> => {
+    await api.delete(`${BASE}/${id}`);
+  }
 };

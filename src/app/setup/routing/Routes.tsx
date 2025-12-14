@@ -1,46 +1,36 @@
-import { shallowEqual, useSelector } from 'react-redux';
-import React from 'react';
+import PrivateRoute from './PrivateRoute';
+import { authService } from '../../core/services/auth.service';
 import { Navigate, Route, Routes as Switch } from 'react-router-dom'
-import MasterLayout from '../../modules/master-layout/MasterLayout';
-import { RootState } from '../redux/RootReducer';
+import React, { Suspense, lazy } from 'react';
 
-const Login = React.lazy(() => import('../../modules/login/components/Login'));
-const Main = React.lazy(() => import('../../modules/main/components/Main'));
-const MemberManagement = React.lazy(() => import('../../modules/member-management/components/MemberManagement'));
-const Register = React.lazy(() => import('../../modules/login/components/Register'));
-const UserManagement = React.lazy(() => import('../../modules/user-management/components/UserManagement'));
-const Profile = React.lazy(() => import('../../modules/profile/components/Profile'));
+const Login = lazy(() => import('../../modules/login/components/Login'));
+const Register = lazy(() => import('../../modules/login/components/Register'));
+const Main = lazy(() => import('../../modules/main/components/Main'));
+const MemberManagement = lazy(() => import('../../modules/member-management/components/MemberManagement'));
+const UserManagement = lazy(() => import('../../modules/user-management/components/UserManagement'));
+const Profile = lazy(() => import('../../modules/profile/components/Profile'));
 
-const Routes: React.FC = () => {
-    const isAuthorized = useSelector<RootState, boolean>(({ auth }) => auth.loggedIn, shallowEqual)
+export const Routes: React.FC = () => {
 
     return (
-        <React.Suspense fallback={null}>
-            <Switch>
-                {isAuthorized ? (
-                    <>
-                        {/* Protected routes - wrapped by MasterLayout */}
-                        <Route element={<MasterLayout />}>
-                            <Route path="/" element={<Main />} />
-                            <Route path="/members" element={<MemberManagement />} />
-                            <Route path="/users" element={<UserManagement />} />
-                            <Route path="/profile" element={<Profile />} />
-                            {/* add other protected routes here as nested children */}
-                            <Route path="*" element={<Navigate to="/" replace />} />
-                        </Route>
-                    </>
-                ) : (
-                    <>
-                        {/* Public routes */}
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/register" element={<Register />} />
-                        {/* Redirect all other paths to login */}
-                        <Route path="*" element={<Navigate to="/login" replace />} />
-                    </>
-                )}
-            </Switch>
-        </React.Suspense>
-    )
-}
+      <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
+        <Switch>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-export { Routes }
+          <Route element={<PrivateRoute />}>
+            <Route path="/" element={<Main />}>
+              <Route index element={<Navigate to="/members" />} />
+              <Route path="members" element={<MemberManagement />} />
+              {authService.isAdmin() && (
+                <Route path="user-management" element={<UserManagement />} />
+              )}
+              <Route path="profile" element={<Profile />} />
+            </Route>
+          </Route>
+
+          <Route path="*" element={<Navigate to="/" />} />
+        </Switch>
+      </Suspense>
+  );
+}

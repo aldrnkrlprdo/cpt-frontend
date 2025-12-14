@@ -1,9 +1,9 @@
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "../../../setup/redux/RootReducer";
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
 import ProfileModal from "../../profile/components/ProfileModal";
-import { RootState } from "../../../setup/redux/RootReducer";
-
+import { UserCircleIcon } from "../../../shared/components/icons";
 const Header: React.FC = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [profileOpen, setProfileOpen] = useState<boolean>(false); // added
@@ -14,10 +14,7 @@ const Header: React.FC = () => {
   const authState = useSelector((s: RootState) => s.auth);
   const isAuthorized = Boolean(authState?.loggedIn);
   const fullName = authState?.fullName || "";
-  const initials = fullName
-    ? fullName.split(" ").map((n: string) => n.charAt(0)).slice(0,2).join("")
-    : "U";
-
+  
   useEffect(() => {
     const onDocClick = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -29,7 +26,7 @@ const Header: React.FC = () => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem("persist:auth");
     dispatch({ type: "auth/logout" });
     navigate("/login", { replace: true });
   };
@@ -56,9 +53,7 @@ const Header: React.FC = () => {
               >
                 {isAuthorized ? (
                   <>
-                    <div className="w-8 h-8 rounded-full bg-white text-nbs-red font-semibold flex items-center justify-center">
-                      {initials}
-                    </div>
+                    <UserCircleIcon className="w-8 h-8" />
                     <span className="hidden sm:inline">{fullName}</span>
                   </>
                 ) : (

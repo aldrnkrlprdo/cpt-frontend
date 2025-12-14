@@ -3,31 +3,31 @@ import { Member } from '../types/MemberManagement.types';
 
 interface Props {
   member?: Member | null;
-  onSubmit: (data: Omit<Member, 'id' | 'dateCreated'>) => void;
+  onSubmit: (data: Omit<Member, 'dateCreated'>) => void;
   onClose: () => void;
   loading?: boolean;
 }
 
 const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, loading = false }) => {
-  const [form, setForm] = useState<Omit<Member, 'id' | 'dateCreated'>>({
+  const [form, setForm] = useState<Omit<Member, 'dateCreated'>>({
+    membershipId: '',
     firstName: '',
     lastName: '',
     email: '',
-    role: 'user',
     status: 'active'
   });
 
   useEffect(() => {
     if (member) {
       setForm({
+        membershipId: member.membershipId,
         firstName: member.firstName,
         lastName: member.lastName,
         email: member.email,
-        role: member.role,
         status: member.status
       });
     } else {
-      setForm({ firstName: '', lastName: '', email: '', role: 'user', status: 'active' });
+      setForm({ membershipId: '', firstName: '', lastName: '', email: '', status: 'active' });
     }
   }, [member]);
 
@@ -54,22 +54,12 @@ const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, load
             <input name="email" type="email" value={form.email} onChange={handleChange} className="nbs-input" placeholder="Email" />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm mb-1">Role</label>
-              <select name="role" value={form.role} onChange={handleChange} className="nbs-input">
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm mb-1">Status</label>
-              <select name="status" value={form.status} onChange={handleChange} className="nbs-input">
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
+          <div>
+            <label className="block text-sm mb-1">Status</label>
+            <select name="status" value={form.status} onChange={handleChange} className="nbs-input">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
           </div>
 
           <div className="flex justify-end gap-2 mt-4">

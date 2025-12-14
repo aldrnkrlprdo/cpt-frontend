@@ -6,6 +6,7 @@ export interface AuthState {
   userId?: string;
   fullName?: string;
   loggedIn: boolean;
+  role?: string;
 }
 
 const initialState: AuthState = {
@@ -13,6 +14,7 @@ const initialState: AuthState = {
   userId: undefined,
   fullName: undefined,
   loggedIn: false,
+  role: undefined,
 };
 
 const authSlice = createSlice({

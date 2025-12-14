@@ -9,7 +9,7 @@ export const MemberManagementService = {
     return resp.data;
   },
 
-  createMember: async (payload: Omit<Member, 'id' | 'dateCreated'>): Promise<Member> => {
+  createMember: async (payload: Omit<Member, 'dateCreated'>): Promise<Member> => {
     const resp = await api.post(BASE, payload);
     return resp.data;
   },

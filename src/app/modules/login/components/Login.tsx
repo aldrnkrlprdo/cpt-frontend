@@ -5,7 +5,7 @@ import * as auth from '../redux/loginReducer';
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const LOGIN_URL = `${process.env.REACT_APP_BASE_API_URL}auth/login`;
+const LOGIN_URL = `${process.env.REACT_APP_BASE_API_URL}auth/login`; // Example URL, replace with your actual login endpoint
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState<string>("");
@@ -66,7 +66,8 @@ const Login: React.FC = () => {
         loggedIn: true,
         userId: (user?.id ?? user?.userId ?? "1").toString(),
         fullName: (user?.fullName ?? `${user?.firstName ?? ""} ${user?.lastName ?? ""}`).trim() || username,
-        accessToken: token
+        accessToken: token,
+        role: user?.role // Make sure role is stored in auth state
       };
 
       dispatch(auth.login(payload));
