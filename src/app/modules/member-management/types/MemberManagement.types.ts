@@ -1,10 +1,12 @@
-export type MemberStatus = 'active' | 'inactive';
+export type MembershipStatus = 'active' | 'inactive' | 'suspended' | 'resigned';
 
 export interface Member {
-  membershipId: string;
+  employeeId: string;
   firstName: string;
   lastName: string;
   email: string;
-  status: MemberStatus;
-  dateCreated: string;
+  membershipStatus: MembershipStatus;
+  dateOfJoining: Date;
+  address: string;
+  phoneNumber?: string;
 }

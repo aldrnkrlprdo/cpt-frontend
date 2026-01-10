@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
 import { User, UserRole, UserStatus } from '../types/UserManagement.types';
+import React, { useEffect, useState } from 'react';
 
 interface Props {
   user?: User | null;
-  onSubmit: (data: Omit<User, 'id' | 'dateCreated'>) => void;
+  onSubmit: (data: Omit<User, 'dateCreated'>) => void;
   onClose: () => void;
   loading?: boolean;
 }
@@ -12,18 +12,23 @@ const roleOptions: UserRole[] = ['User', 'Admin'];
 const statusOptions: UserStatus[] = ['Active', 'Inactive'];
 
 const UserManagementForm: React.FC<Props> = ({ user, onSubmit, onClose, loading = false }) => {
-  const [form, setForm] = useState<Omit<User, 'id' | 'dateCreated'>>({
+  const [form, setForm] = useState<Omit<User, 'dateCreated'> & { password?: string; confirmPassword?: string }>({
+    id: '',
     firstName: '',
     lastName: '',
     username: '', // added
     email: '',
     role: 'User',
-    status: 'Active'
+    status: 'Active',
+    password: '',
+    confirmPassword: ''
   });
 
   useEffect(() => {
     if (user) {
+      console.log('UserManagementForm: user is defined ', user, user.id);
       setForm({
+        id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
         username: user.username, // added
@@ -33,12 +38,15 @@ const UserManagementForm: React.FC<Props> = ({ user, onSubmit, onClose, loading 
       });
     } else {
       setForm({
+        id: '',
         firstName: '',
         lastName: '',
         username: '', // added
         email: '',
         role: 'User',
-        status: 'Active'
+        status: 'Active',
+        password: '',
+        confirmPassword: ''
       });
     }
   }, [user]);
@@ -50,6 +58,10 @@ const UserManagementForm: React.FC<Props> = ({ user, onSubmit, onClose, loading 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (form.password !== form.confirmPassword) {
+      alert("Passwords do not match."); // Or use a toast notification
+      return;
+    }
     if (!loading) onSubmit(form);
   };
 
@@ -72,6 +84,30 @@ const UserManagementForm: React.FC<Props> = ({ user, onSubmit, onClose, loading 
           <div>
             <label className="block text-sm mb-1">Email</label>
             <input name="email" type="email" value={form.email} onChange={handleChange} className="nbs-input" />
+          </div>
+
+          <div className="space-y-3">
+            <label className="block text-sm font-medium">{user ? 'Change Password (optional)' : 'Password'}</label>
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                name="password"
+                type="password"
+                value={form.password}
+                onChange={handleChange}
+                className="nbs-input"
+                placeholder="New Password"
+                required={!user}
+              />
+              <input
+                name="confirmPassword"
+                type="password"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                className="nbs-input"
+                placeholder="Confirm Password"
+                required={!user}
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">

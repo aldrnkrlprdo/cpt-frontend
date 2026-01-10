@@ -7,6 +7,8 @@ const Login = lazy(() => import('../../modules/login/components/Login'));
 const Register = lazy(() => import('../../modules/login/components/Register'));
 const Main = lazy(() => import('../../modules/main/components/Main'));
 const MemberManagement = lazy(() => import('../../modules/member-management/components/MemberManagement'));
+const PaymentManagement = lazy(() => import('../../modules/payment-management/components/PaymentManagement'));
+const LoanManagement = lazy(() => import('../../modules/loan-management/components/LoanManagement'));
 const UserManagement = lazy(() => import('../../modules/user-management/components/UserManagement'));
 const Profile = lazy(() => import('../../modules/profile/components/Profile'));
 
@@ -20,8 +22,10 @@ export const Routes: React.FC = () => {
 
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<Main />}>
-              <Route index element={<Navigate to="/members" />} />
+              <Route index element={<Navigate to="/payment-management" />} />
               <Route path="members" element={<MemberManagement />} />
+              <Route path="payment-management" element={<PaymentManagement />} />
+              <Route path="loan-management" element={<LoanManagement />} />
               {authService.isAdmin() && (
                 <Route path="user-management" element={<UserManagement />} />
               )}

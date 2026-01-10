@@ -7,6 +7,7 @@ import { Member } from '../types/MemberManagement.types';
 import MemberManagementForm from './MemberManagementForm';
 import { MemberManagementService } from '../services/MemberManagement.service';
 import { toast } from 'react-toastify';
+import { formatLocalStringDate, upperFirstLetter } from '../../../shared/components/helper';
 
 const MemberManagement: React.FC = () => {
   const [members, setMembers] = useState<Member[]>([]);
@@ -41,11 +42,11 @@ const MemberManagement: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (data: Omit<Member, 'dateCreated'>) => {
+  const handleSubmit = async (data: Omit<Member, 'dateOfJoining'>) => {
     setLoading(true);
     try {
       if (selectedMember) {
-        await MemberManagementService.updateMember(selectedMember.membershipId, data);
+        await MemberManagementService.updateMember(selectedMember.employeeId, data);
         toast.success('Member updated');
       } else {
         await MemberManagementService.createMember(data);
@@ -62,20 +63,11 @@ const MemberManagement: React.FC = () => {
   };
 
   const columnDefs: ColDef[] = [
-    { field: 'firstName', headerName: 'First Name', sortable: true, filter: true },
-    { field: 'lastName', headerName: 'Last Name', sortable: true, filter: true },
-    { field: 'email', headerName: 'Email', sortable: true, filter: true },
-    {
-      field: 'membershipStatus',
-      headerName: 'Status',
-      sortable: true,
-      filter: true,
-      valueFormatter: params => params.value ? String(params.value).charAt(0).toUpperCase() + String(params.value).slice(1) : ''
-    },
-    { field: 'createdAt', headerName: 'Date Created', sortable: true, filter: true },
-    { field: 'updatedAt', headerName: 'Date Updated', sortable: true, filter: true },
     {
       headerName: 'Actions',
+      pinned: 'left',
+      width: 100,
+      resizable: false,
       cellRenderer: (params: any) => (
         <div className="flex gap-3 items-center justify-left h-full">
           <button
@@ -88,7 +80,7 @@ const MemberManagement: React.FC = () => {
             </svg>
           </button>
           <button
-            onClick={() => handleDelete(params.data.id)}
+            onClick={() => handleDelete(params.data.employeeId)}
             className="text-red-600 hover:text-red-800 transition"
             title="Delete user"
           >
@@ -98,7 +90,27 @@ const MemberManagement: React.FC = () => {
           </button>
         </div>
       )
-    }
+    },
+    { field: 'employeeId', headerName: 'Employee ID', sortable: true, filter: true },
+    { field: 'firstName', headerName: 'First Name', sortable: true, filter: true },
+    { field: 'lastName', headerName: 'Last Name', sortable: true, filter: true },
+    { field: 'email', headerName: 'Email', sortable: true, filter: true },
+    { field: 'phoneNumber', headerName: 'Phone Number', sortable: true, filter: true },
+    { field: 'address', headerName: 'Address', sortable: true, filter: true },
+    {
+      field: 'membershipStatus',
+      headerName: 'Status',
+      sortable: true,
+      filter: true,
+      valueFormatter: params => params.value ? upperFirstLetter(params.value) : ''
+    },
+    {
+      field: 'dateOfJoining',
+      headerName: 'Date of Joining',
+      sortable: true,
+      filter: true,
+      valueFormatter: (params) => params.value ? formatLocalStringDate(params.value) : ''
+    },
   ];
 
   return (

@@ -1,12 +1,18 @@
 import React from 'react';
+import LogoutButton from './LogoutButton';
 import { authService } from '../../../core/services/auth.service';
 import { NavLink, useLocation } from 'react-router-dom';
-import { UsersIcon, CogIcon } from '../../../shared/components/icons';
-import LogoutButton from './LogoutButton';
-
+import {
+  UsersIcon,
+  CogIcon,
+  CreditCardIcon,
+  CurrencyDollarIcon,
+} from '../../../shared/components/icons';
 const Sidebar: React.FC = () => {
   const location = useLocation();
   const navItems = [
+    { path: '/payment-management', label: 'Payment Management', icon: <CreditCardIcon className="w-5 h-5" /> },
+    { path: '/loan-management', label: 'Loan Management', icon: <CurrencyDollarIcon className="w-5 h-5" /> },
     { path: '/members', label: 'Member Management', icon: <UsersIcon className="w-5 h-5" /> },
     { path: '/user-management', label: 'User Management', icon: <CogIcon className="w-5 h-5" />, adminOnly: true }
   ];

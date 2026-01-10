@@ -3,37 +3,47 @@ import { Member } from '../types/MemberManagement.types';
 
 interface Props {
   member?: Member | null;
-  onSubmit: (data: Omit<Member, 'dateCreated'>) => void;
+  onSubmit: (data: Member) => void;
   onClose: () => void;
   loading?: boolean;
 }
 
 const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, loading = false }) => {
-  const [form, setForm] = useState<Omit<Member, 'dateCreated'>>({
-    membershipId: '',
+  const [form, setForm] = useState<Member>({
+    employeeId: '',
     firstName: '',
     lastName: '',
     email: '',
-    status: 'active'
+    phoneNumber: '',
+    membershipStatus: 'active',
+    address: '',
+    dateOfJoining: new Date()
   });
 
   useEffect(() => {
     if (member) {
       setForm({
-        membershipId: member.membershipId,
+        employeeId: member.employeeId,
         firstName: member.firstName,
         lastName: member.lastName,
         email: member.email,
-        status: member.status
+        phoneNumber: member.phoneNumber || '',
+        membershipStatus: member.membershipStatus,
+        address: member.address,
+        dateOfJoining: member.dateOfJoining,
       });
     } else {
-      setForm({ membershipId: '', firstName: '', lastName: '', email: '', status: 'active' });
+      setForm({ employeeId: '', firstName: '', lastName: '', email: '', phoneNumber: '', membershipStatus: 'active', address: '', dateOfJoining: new Date() });
     }
   }, [member]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    if (name === 'dateOfJoining') {
+      setForm(prev => ({ ...prev, [name]: new Date(value) }));
+    } else {
+      setForm(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -46,6 +56,9 @@ const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, load
       <div className="bg-white p-6 rounded-lg w-full max-w-md">
         <h2 className="text-xl font-bold mb-4">{member ? 'Edit Member' : 'Add New Member'}</h2>
         <form onSubmit={handleSubmit} className="space-y-3">
+          <div>
+            <input name="employeeId" value={form.employeeId} onChange={handleChange} className="nbs-input" placeholder="Employee ID" required disabled={!!member} />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <input name="firstName" value={form.firstName} onChange={handleChange} className="nbs-input" placeholder="First name" required />
             <input name="lastName" value={form.lastName} onChange={handleChange} className="nbs-input" placeholder="Last name" required />
@@ -55,10 +68,24 @@ const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, load
           </div>
 
           <div>
+            <input name="phoneNumber" value={form.phoneNumber} onChange={handleChange} className="nbs-input" placeholder="Phone Number" />
+          </div>
+
+          <div>
+            <textarea name="address" value={typeof form.address === 'string' ? form.address : ''} onChange={handleChange} className="nbs-input" placeholder="Address" rows={3}></textarea>
+          </div>
+
+          <div>
+            <input name="dateOfJoining" type="date" value={form.dateOfJoining ? new Date(form.dateOfJoining).toLocaleDateString('en-CA') : ''} onChange={handleChange} className="nbs-input" placeholder="Date of Joining" />
+          </div>
+
+          <div>
             <label className="block text-sm mb-1">Status</label>
-            <select name="status" value={form.status} onChange={handleChange} className="nbs-input">
+            <select name="membershipStatus" value={form.membershipStatus} onChange={handleChange} className="nbs-input">
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
+              <option value="suspended">Suspended</option>
+              <option value="resigned">Resigned</option>
             </select>
           </div>
 
