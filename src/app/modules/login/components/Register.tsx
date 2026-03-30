@@ -52,7 +52,7 @@ const Register: React.FC = () => {
                 }
             );
 
-            if (resp.status === 200) {
+            if (resp.status === 200 || resp.status === 201) {
                 toast.success("Registration successful. Please sign in.");
                 navigate("/login", { replace: true });
             }
