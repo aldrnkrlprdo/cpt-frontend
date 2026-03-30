@@ -80,7 +80,7 @@ const Login: React.FC = () => {
         // request cancelled — ignore
         return;
       }
-      const message = err?.response?.data?.message || err?.message || "Login failed";
+      const message = err?.response?.data?.error || err?.message || "Login failed";
       toast.error(message);
       console.error("Login error:", err);
     } finally {
