@@ -67,7 +67,7 @@ const Login: React.FC = () => {
       const payload: auth.AuthState = {
         loggedIn: true,
         userId: (user?.id ?? user?.userId ?? "1").toString(),
-        fullName: (user?.fullName ?? `${user?.firstName ?? ""} ${user?.lastName ?? ""}`).trim(),
+        fullName: (user?.firstName ?? "").trim(),
         accessToken: token,
         role: user?.role // Make sure role is stored in auth state
       };
