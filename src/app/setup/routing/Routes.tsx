@@ -1,7 +1,7 @@
-import PrivateRoute from './PrivateRoute';
-import { authService } from '../../core/services/auth.service';
-import { Navigate, Route, Routes as Switch } from 'react-router-dom'
 import React, { Suspense, lazy } from 'react';
+import { Navigate, useRoutes } from 'react-router-dom';
+import PrivateRoute from './PrivateRoute';
+import PublicRoute from './PublicRoute'; // Import PublicRoute
 
 const Login = lazy(() => import('../../modules/login/components/Login'));
 const Register = lazy(() => import('../../modules/login/components/Register'));
@@ -11,30 +11,47 @@ const PaymentManagement = lazy(() => import('../../modules/payment-management/co
 const LoanManagement = lazy(() => import('../../modules/loan-management/components/LoanManagement'));
 const UserManagement = lazy(() => import('../../modules/user-management/components/UserManagement'));
 const Profile = lazy(() => import('../../modules/profile/components/Profile'));
+const LoanTypeManagement = lazy(() => import('../../modules/master-record/branch/components/LoanTypeManagement'));
+const BranchManagement = lazy(() => import('../../modules/master-record/branch/components/BranchManagement'));
+const ReportsPage = lazy(() => import('../../modules/reports/components/ReportsPage'));
 
 export const Routes: React.FC = () => {
+  const routes = useRoutes([
+    {
+      path: '/',
+      element: <PublicRoute />,
+      children: [
+        { path: 'login', element: <Login /> },
+        { path: 'register', element: <Register /> },
+        { path: '/', element: <Navigate to="/login" /> },
+      ],
+    },
+    {
+      path: '/*',
+      element: <PrivateRoute />,
+      children: [
+        {
+          path: '',
+          element: <Main />,
+          children: [
+            { path: 'profile', element: <Profile /> },
+            { path: 'members', element: <MemberManagement /> },
+            { path: 'payment-management', element: <PaymentManagement /> },
+            { path: 'loan-management', element: <LoanManagement /> },
+            { path: 'user-management', element: <UserManagement /> },
+            { path: 'master-record/loan-types', element: <LoanTypeManagement /> },
+            { path: 'master-record/branches', element: <BranchManagement /> },
+            { path: 'reports', element: <ReportsPage /> },
+            { path: '*', element: <Navigate to="/payment-management" /> },
+          ]
+        }
+      ],
+    },
+    {
+      path: '*',
+      element: <Navigate to="/login" />,
+    },
+  ]);
 
-    return (
-      <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
-        <Switch>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-
-          <Route element={<PrivateRoute />}>
-            <Route path="/" element={<Main />}>
-              <Route index element={<Navigate to="/payment-management" />} />
-              <Route path="members" element={<MemberManagement />} />
-              <Route path="payment-management" element={<PaymentManagement />} />
-              <Route path="loan-management" element={<LoanManagement />} />
-              {authService.isAdmin() && (
-                <Route path="user-management" element={<UserManagement />} />
-              )}
-              <Route path="profile" element={<Profile />} />
-            </Route>
-          </Route>
-
-          <Route path="*" element={<Navigate to="/" />} />
-        </Switch>
-      </Suspense>
-  );
-}
+  return <Suspense fallback={<div>Loading...</div>}>{routes}</Suspense>;
+};

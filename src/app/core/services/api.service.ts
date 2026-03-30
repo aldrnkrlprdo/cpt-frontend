@@ -1,24 +1,34 @@
 import axios from 'axios';
-import { getToken } from './token.service';
 
 const API_BASE_URL = `${process.env.REACT_APP_BASE_API_URL}`;
 
-const controller = new AbortController();
+let api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  withCredentials: true
+});
 
-export const api = axios.create({
+export const setupAxios = () => {
+  api = axios.create({
     baseURL: API_BASE_URL,
     headers: {
-        'Content-Type': 'application/json'
+      'Content-Type': 'application/json'
     },
-    signal: controller.signal,
     withCredentials: true
-});
+  });
 
-// Add request interceptor to inject auth token
-api.interceptors.request.use((config) => {
-    const token = getToken();
+  // Add request interceptor to inject auth token
+  api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
     if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
-});
+  }, (err) => Promise.reject(err));
+};
+
+setupAxios(); // Initial setup
+
+export { api };

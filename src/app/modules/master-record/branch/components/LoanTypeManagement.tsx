@@ -3,66 +3,66 @@ import { AgGridReact } from 'ag-grid-react';
 import { ColDef } from 'ag-grid-community';
 import { toast } from 'react-toastify';
 import { MasterRecordService } from '../../services/MasterRecord.service';
-import { Branch } from '../../types/MasterRecord.types';
-import BranchForm from './BranchForm';
+import { LoanType } from '../../types/MasterRecord.types';
 import { PlusCircleIcon, EditIcon, TrashIcon } from '../../../../shared/components/icons';
+import LoanTypeForm from './LoanTypeForm';
 
-const BranchManagement: React.FC = () => {
-    const [branches, setBranches] = useState<Branch[]>([]);
+const LoanTypeManagement: React.FC = () => {
+    const [loanTypes, setLoanTypes] = useState<LoanType[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
+    const [selectedLoanType, setSelectedLoanType] = useState<LoanType | null>(null);
     const [loading, setLoading] = useState(false);
 
-    const fetchBranches = useCallback(async () => {
+    const fetchLoanTypes = useCallback(async () => {
         try {
             setLoading(true);
-            const data = await MasterRecordService.getBranches();
-            const mappedData = data.map((b: any) => ({ ...b, id: b._id || b.id }));
-            setBranches(mappedData);
+            const data = await MasterRecordService.getLoanTypes();
+            const mappedData = data.map((lt: any) => ({ ...lt, id: lt._id || lt.id }));
+            setLoanTypes(mappedData);
         } catch (error) {
-            toast.error('Failed to fetch branches');
-            console.error('Error fetching branches:', error);
+            toast.error('Failed to fetch loan types');
+            console.error('Error fetching loan types:', error);
         } finally {
             setLoading(false);
         }
     }, []);
 
     useEffect(() => {
-        fetchBranches();
-    }, [fetchBranches]);
+        fetchLoanTypes();
+    }, [fetchLoanTypes]);
 
-    const handleFormSubmit = async (formData: Omit<Branch, 'createdAt' | 'updatedAt'>) => {
+    const handleFormSubmit = async (formData: Omit<LoanType, 'createdAt' | 'updatedAt'>) => {
         try {
-            if (selectedBranch) {
-                await MasterRecordService.updateBranch(selectedBranch.branchCode, formData);
-                toast.success('Branch updated successfully!');
+            if (selectedLoanType) {
+                await MasterRecordService.updateLoanType(selectedLoanType.loanTypeCode, formData);
+                toast.success('Loan type updated successfully!');
             } else {
-                await MasterRecordService.createBranch(formData);
-                toast.success('Branch created successfully!');
+                await MasterRecordService.createLoanType(formData);
+                toast.success('Loan type created successfully!');
             }
             setIsModalOpen(false);
-            setSelectedBranch(null);
-            fetchBranches();
+            setSelectedLoanType(null);
+            fetchLoanTypes();
         } catch (error) {
-            toast.error('Failed to save branch');
-            console.error('Error saving branch:', error);
+            toast.error('Failed to save loan type');
+            console.error('Error saving loan type:', error);
         }
     };
 
-    const handleEdit = (branch: Branch) => {
-        setSelectedBranch(branch);
+    const handleEdit = (loanTypeName: LoanType) => {
+        setSelectedLoanType(loanTypeName);
         setIsModalOpen(true);
     };
 
     const handleDelete = async (id: string) => {
-        if (window.confirm('Are you sure you want to delete this branch?')) {
+        if (window.confirm('Are you sure you want to delete this loan type?')) {
             try {
-                await MasterRecordService.deleteBranch(id);
-                toast.success('Branch deleted successfully!');
-                fetchBranches();
+                await MasterRecordService.deleteLoanType(id);
+                toast.success('Loan type deleted successfully!');
+                fetchLoanTypes();
             } catch (error) {
-                toast.error('Failed to delete branch');
-                console.error('Error deleting branch:', error);
+                toast.error('Failed to delete loan type');
+                console.error('Error deleting loan type:', error);
             }
         }
     };
@@ -86,28 +86,28 @@ const BranchManagement: React.FC = () => {
             filter: false,
             resizable: false,
         },
-        { field: 'branchCode', headerName: 'Branch Code', sortable: true, filter: true, flex: 1 },
-        { field: 'branchName', headerName: 'Branch Name', sortable: true, filter: true, flex: 2 },
+        { field: 'loanTypeCode', headerName: 'Loan Type Code', sortable: true, filter: true, flex: 1 },
+        { field: 'loanTypeName', headerName: 'Loan Type', sortable: true, filter: true, flex: 2 },
     ];
 
     return (
         <div className="p-4">
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Branch Management</h2>
+                <h2 className="text-xl font-semibold">Loan Types</h2>
                 <button
                     onClick={() => {
-                        setSelectedBranch(null);
+                        setSelectedLoanType(null);
                         setIsModalOpen(true);
                     }}
                     className="flex items-center gap-2 nbs-button"
                 >
                     <PlusCircleIcon className="w-5 h-5" />
-                    Add New Branch
+                    Add New Loan Type
                 </button>
             </div>
             <div className="ag-theme-alpine" style={{ height: 'calc(100vh - 300px)', width: '100%' }}>
                 <AgGridReact
-                    rowData={branches}
+                    rowData={loanTypes}
                     columnDefs={columnDefs}
                     defaultColDef={{
                         sortable: true,
@@ -117,19 +117,19 @@ const BranchManagement: React.FC = () => {
                     pagination={true}
                     paginationPageSize={20}
                     suppressRowClickSelection={true}
-                    onGridReady={fetchBranches}
+                    onGridReady={() => fetchLoanTypes()}
                     overlayLoadingTemplate={loading ? '<span class="ag-overlay-loading-center">Loading...</span>' : ''}
-                    overlayNoRowsTemplate='<span style="padding: 10px; border: 2px solid #444; background: lightgoldenrodyellow;">No branches found</span>'
+                    overlayNoRowsTemplate='<span style="padding: 10px; border: 2px solid #444; background: lightgoldenrodyellow;">No loan types found</span>'
                 />
             </div>
-            <BranchForm
+            <LoanTypeForm
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onSubmit={handleFormSubmit}
-                initialData={selectedBranch}
+                initialData={selectedLoanType}
             />
         </div>
     );
 };
 
-export default BranchManagement;
+export default LoanTypeManagement;

@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import * as auth from '../redux/loginReducer';
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { getTokenPayload } from "../../../core/utils/tokenUtils";
 
 const LOGIN_URL = `${process.env.REACT_APP_BASE_API_URL}auth/login`; // Example URL, replace with your actual login endpoint
 
@@ -48,14 +49,15 @@ const Login: React.FC = () => {
         data?.data?.token ||
         data?.data?.accessToken;
 
-      const user =
-        data?.user ||
-        data?.data?.user ||
-        data?.data ||
-        data;
-
       if (!token) {
         const message = data?.message || "Authentication failed: token not returned";
+        throw new Error(message);
+      }
+
+      const user = getTokenPayload(token);
+
+      if (!user) {
+        const message = "Authentication failed: could not decode user data from token";
         throw new Error(message);
       }
 

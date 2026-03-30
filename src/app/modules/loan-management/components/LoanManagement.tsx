@@ -10,6 +10,8 @@ import { EyeIcon, PlusCircleIcon } from '../../../shared/components/icons';
 import LoanManagementForm from './LoanManagementForm';
 import { Loan } from '../types/LoanManagement.types';
 import { upperFirstLetter } from '../../../shared/components/helper';
+import ViewLoansModal from './ViewLoansModal';
+import { LoanManagementService } from '../services/LoanManagement.service';
 
 const LoanManagement: React.FC = () => {
     const [members, setMembers] = useState<Member[]>([]);
@@ -17,6 +19,7 @@ const LoanManagement: React.FC = () => {
     const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
     const [selectedMember, setSelectedMember] = useState<Member | null>(null);
     const [formLoading, setFormLoading] = useState<boolean>(false);
+    const [isViewModalOpen, setIsViewModalOpen] = useState<boolean>(false);
 
     const mountedRef = useRef(true);
     const [searchBy, setSearchBy] = useState('lastName');
@@ -28,7 +31,7 @@ const LoanManagement: React.FC = () => {
         try {
             const data = await PaymentManagementService.getMembers(searchBy, searchText);
             if (mountedRef.current) {
-                setMembers(data);
+                setMembers(data.filter(members => members.membershipStatus === 'active'));
             }
         } catch (error) {
             console.error('Failed to fetch members:', error);
@@ -55,8 +58,8 @@ const LoanManagement: React.FC = () => {
     };
 
     const handleViewLoansClick = (member: Member) => {
-        // Placeholder for viewing payments. This could navigate to a new page or open another modal.
-        toast.info(`Viewing payments for ${member.firstName} ${member.lastName}`);
+        setSelectedMember(member);
+        setIsViewModalOpen(true);
     };
 
     const handleFormClose = () => {
@@ -64,16 +67,21 @@ const LoanManagement: React.FC = () => {
         setSelectedMember(null);
     };
 
-    const handleFormSubmit = async (data: Omit<Loan, 'loanId' | 'dateCreated' | 'employee' | 'totalPayable' | 'monthlyPayment'>) => {
+    const handleViewModalClose = () => {
+        setIsViewModalOpen(false);
+        setSelectedMember(null);
+    };
+
+    const handleFormSubmit = async (data: Omit<Loan, 'loanId' | 'dateCreated' | 'employee'>) => {
         setFormLoading(true);
         try {
             // Assuming a service method to create a payment
-            // await PaymentManagementService.createPayment(data);
-            toast.success(`Payment added for ${selectedMember?.firstName}`);
+            await LoanManagementService.createLoan(data);
+            toast.success(`Loan added for ${selectedMember?.firstName}`);
             handleFormClose();
             // Optionally, you might want to refresh some data here
         } catch (error) {
-            toast.error('Failed to add payment.');
+            toast.error('Failed to add loan.');
         } finally {
             setFormLoading(false);
         }
@@ -87,10 +95,10 @@ const LoanManagement: React.FC = () => {
     const ActionsCellRenderer = (props: { data: Member }) => {
         return (
             <div className="flex items-center justify-center h-full space-x-2">
-                <button onClick={() => handleAddLoanClick(props.data)} title="Add Payment" className="text-green-600 hover:text-green-800">
+                <button onClick={() => handleAddLoanClick(props.data)} title="Add Loans" className="text-green-600 hover:text-green-800">
                     <PlusCircleIcon className="w-5 h-5" />
                 </button>
-                <button onClick={() => handleViewLoansClick(props.data)} title="View Payments" className="text-blue-600 hover:text-blue-800">
+                <button onClick={() => handleViewLoansClick(props.data)} title="View Loans" className="text-blue-600 hover:text-blue-800">
                     <EyeIcon className="w-5 h-5" />
                 </button>
             </div>
@@ -109,7 +117,9 @@ const LoanManagement: React.FC = () => {
         },
         { headerName: 'Employee ID', field: 'employeeId', sortable: true, filter: true },
         { headerName: 'First Name', field: 'firstName', sortable: true, filter: true },
+        { headerName: 'Middle Name', field: 'middleName', sortable: true, filter: true },
         { headerName: 'Last Name', field: 'lastName', sortable: true, filter: true },
+        { headerName: 'Branch', field: 'branch', sortable: true, filter: true },
         { headerName: 'Email', field: 'email', sortable: true, filter: true },
         { headerName: 'Status', field: 'membershipStatus', sortable: true, filter: true, valueFormatter: (params) => params.data.membershipStatus ? upperFirstLetter(params.data.membershipStatus) : params.data.membershipStatus },
     ];
@@ -123,9 +133,11 @@ const LoanManagement: React.FC = () => {
             <form onSubmit={handleSearch} className="flex items-center gap-2 mb-4">
                 <select value={searchBy} onChange={(e) => setSearchBy(e.target.value)} className="nbs-input">
                     <option value="firstName">First Name</option>
+                    <option value="middleName">Middle Name</option>
                     <option value="lastName">Last Name</option>
                     <option value="employeeId">Employee ID</option>
                     <option value="email">Email</option>
+                    <option value="branch">Branch</option>
                     <option value="status">Status</option>
                 </select>
                 <input
@@ -146,7 +158,7 @@ const LoanManagement: React.FC = () => {
                     columnDefs={columnDefs}
                     defaultColDef={{ sortable: true, filter: true, resizable: true }}
                     pagination={true}
-                    paginationPageSize={15}
+                    paginationPageSize={20}
                     suppressRowClickSelection={true}
                     overlayLoadingTemplate='<span class="ag-overlay-loading-center">Please wait while your rows are loading</span>'
                     animateRows={true}
@@ -158,6 +170,13 @@ const LoanManagement: React.FC = () => {
                     onClose={handleFormClose}
                     onSubmit={handleFormSubmit}
                     loading={formLoading}
+                />
+            )}
+
+            {isViewModalOpen && selectedMember && (
+                <ViewLoansModal
+                    member={selectedMember}
+                    onClose={handleViewModalClose}
                 />
             )}
         </div>

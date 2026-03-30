@@ -11,6 +11,7 @@ import { PaymentManagementService } from '../services/PaymentManagement.service'
 import MemberPaymentForm, { PaymentFormData } from './MemberPaymentForm';
 import { PlusCircleIcon, EyeIcon } from '../../../shared/components/icons';
 import { upperFirstLetter } from '../../../shared/components/helper';
+import ViewPaymentsModal from './ViewPaymentsModal';
 
 const PaymentManagement: React.FC = () => {
   const [members, setMembers] = useState<Member[]>([]);
@@ -18,6 +19,7 @@ const PaymentManagement: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [formLoading, setFormLoading] = useState<boolean>(false);
+  const [isViewPaymentsModalOpen, setIsViewPaymentsModalOpen] = useState<boolean>(false);
 
   const [searchBy, setSearchBy] = useState('lastName');
   const [searchText, setSearchText] = useState('');
@@ -26,7 +28,7 @@ const PaymentManagement: React.FC = () => {
     setLoading(true);
     try {
       const data = await PaymentManagementService.getMembers(searchBy, searchText);
-      setMembers(data);
+      setMembers(data.filter(members => members.membershipStatus === 'active'));
     } catch (error) {
       toast.error('Failed to fetch members.');
     } finally {
@@ -49,9 +51,14 @@ const PaymentManagement: React.FC = () => {
   };
 
   const handleViewPaymentsClick = (member: Member) => {
-    // Placeholder for viewing payments. This could navigate to a new page or open another modal.
-    toast.info(`Viewing payments for ${member.firstName} ${member.lastName}`);
+    setSelectedMember(member);
+    setIsViewPaymentsModalOpen(true);
   };
+
+  const handleViewPaymentsModalClose = () => {
+    setIsViewPaymentsModalOpen(false);
+    setSelectedMember(null);
+  }
 
   const handleFormClose = () => {
     setIsFormOpen(false);
@@ -62,7 +69,7 @@ const PaymentManagement: React.FC = () => {
     setFormLoading(true);
     try {
       // Assuming a service method to create a payment
-      // await PaymentManagementService.createPayment(data);
+      await PaymentManagementService.createPayment(data);
       toast.success(`Payment added for ${selectedMember?.firstName}`);
       handleFormClose();
       // Optionally, you might want to refresh some data here
@@ -98,21 +105,27 @@ const PaymentManagement: React.FC = () => {
     },
     { headerName: 'Employee ID', field: 'employeeId', sortable: true, filter: true },
     { headerName: 'First Name', field: 'firstName', sortable: true, filter: true },
+    { headerName: 'Middle Name', field: 'middleName', sortable: true, filter: true },
     { headerName: 'Last Name', field: 'lastName', sortable: true, filter: true },
+    { headerName: 'Branch', field: 'branch', sortable: true, filter: true },
     { headerName: 'Email', field: 'email', sortable: true, filter: true },
-    { headerName: 'Status', field: 'membershipStatus', sortable: true, filter: true, valueFormatter: (params) => params.value ? upperFirstLetter(params.value) : params.value },
+    { headerName: 'Status', field: 'membershipStatus', sortable: true, filter: true, valueFormatter: (params) => params.data.membershipStatus ? upperFirstLetter(params.data.membershipStatus) : '' },
   ];
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Payment Management</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Payment Management</h1>
+      </div>
 
       <form onSubmit={handleSearch} className="flex items-center gap-2 mb-4">
         <select value={searchBy} onChange={(e) => setSearchBy(e.target.value)} className="nbs-input">
           <option value="firstName">First Name</option>
+          <option value="middleName">Middle Name</option>
           <option value="lastName">Last Name</option>
           <option value="employeeId">Employee ID</option>
           <option value="email">Email</option>
+          <option value="branch">Branch</option>
           <option value="status">Status</option>
         </select>
         <input
@@ -131,11 +144,12 @@ const PaymentManagement: React.FC = () => {
         <AgGridReact
           rowData={members}
           columnDefs={columnDefs}
-          pagination
-          paginationPageSize={10}
-          suppressRowClickSelection
-          overlayLoadingTemplate='<span class="ag-overlay-loading-center">Loading...</span>'
-          loadingOverlayComponent={loading ? 'Loading...' : undefined}
+          defaultColDef={{ sortable: true, filter: true, resizable: true }}
+          pagination={true}
+          paginationPageSize={15}
+          suppressRowClickSelection={true}
+          overlayLoadingTemplate='<span class="ag-overlay-loading-center">Please wait while your rows are loading</span>'
+          animateRows={true}
         />
       </div>
 
@@ -145,6 +159,13 @@ const PaymentManagement: React.FC = () => {
           onClose={handleFormClose}
           onSubmit={handleFormSubmit}
           loading={formLoading}
+        />
+      )}
+
+      {isViewPaymentsModalOpen && selectedMember && (
+        <ViewPaymentsModal
+          member={selectedMember}
+          onClose={handleViewPaymentsModalClose}
         />
       )}
     </div>

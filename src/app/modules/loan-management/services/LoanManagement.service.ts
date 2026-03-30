@@ -10,7 +10,12 @@ export const LoanManagementService = {
     return resp.data;
   },
 
-  createLoan: async (payload: Omit<Loan, 'loanId' | 'dateCreated' | 'employee'>): Promise<Loan> => {
+  getLoansByEmployeeId: async (id: string): Promise<Loan[]> => {
+    const resp = await api.get(`${BASE}/employee/${id}`);
+    return resp.data;
+  },
+
+  createLoan: async (payload: Omit<Loan, 'loanId' | 'dateCreated' | 'employee' >): Promise<Loan> => {
     const resp = await api.post(BASE, payload);
     return resp.data;
   },

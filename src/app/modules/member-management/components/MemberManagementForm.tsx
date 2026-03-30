@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Member } from '../types/MemberManagement.types';
+import { useSelector } from 'react-redux';
+import { selectBranches } from '../../master-record/redux/masterRecordSlice';
 
 interface Props {
   member?: Member | null;
@@ -9,10 +11,13 @@ interface Props {
 }
 
 const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, loading = false }) => {
+  const branches = useSelector(selectBranches);
   const [form, setForm] = useState<Member>({
     employeeId: '',
     firstName: '',
+    middleName: '',
     lastName: '',
+    branch: '',
     email: '',
     phoneNumber: '',
     membershipStatus: 'active',
@@ -25,7 +30,9 @@ const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, load
       setForm({
         employeeId: member.employeeId,
         firstName: member.firstName,
+        middleName: member.middleName || '',
         lastName: member.lastName,
+        branch: member.branch || '',
         email: member.email,
         phoneNumber: member.phoneNumber || '',
         membershipStatus: member.membershipStatus,
@@ -33,7 +40,7 @@ const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, load
         dateOfJoining: member.dateOfJoining,
       });
     } else {
-      setForm({ employeeId: '', firstName: '', lastName: '', email: '', phoneNumber: '', membershipStatus: 'active', address: '', dateOfJoining: new Date() });
+      setForm({ employeeId: '', firstName: '', middleName: '', lastName: '', branch: '', email: '', phoneNumber: '', membershipStatus: 'active', address: '', dateOfJoining: new Date() });
     }
   }, [member]);
 
@@ -61,7 +68,14 @@ const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, load
           </div>
           <div className="grid grid-cols-2 gap-3">
             <input name="firstName" value={form.firstName} onChange={handleChange} className="nbs-input" placeholder="First name" required />
+            <input name="middleName" value={form.middleName} onChange={handleChange} className="nbs-input" placeholder="Middle name" />
             <input name="lastName" value={form.lastName} onChange={handleChange} className="nbs-input" placeholder="Last name" required />
+            <select name="branch" value={form.branch} onChange={handleChange} className="nbs-input">
+              <option value="">Select Branch</option>
+              {branches.map(branch => (
+                <option key={branch.branchCode} value={branch.branchName}>{branch.branchName}</option>
+              ))}
+            </select>
           </div>
           <div>
             <input name="email" type="email" value={form.email} onChange={handleChange} className="nbs-input" placeholder="Email" />

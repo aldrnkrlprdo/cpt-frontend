@@ -1,5 +1,6 @@
 import { combineReducers } from '@reduxjs/toolkit';
 import authReducer from '../../modules/login/redux/loginReducer';
+import masterRecordReducer from '../../modules/master-record/redux/masterRecordSlice';
 import { persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage'; // defaults to localStorage
 
@@ -11,6 +12,7 @@ const authPersistConfig = {
 
 const rootReducer = combineReducers({
   auth: persistReducer(authPersistConfig, authReducer),
+  masterRecord: masterRecordReducer,
   // other reducers...
 });
 

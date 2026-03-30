@@ -3,19 +3,18 @@ import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Member } from '../../member-management/types/MemberManagement.types';
 import { PaymentManagementService } from '../services/PaymentManagement.service';
-
-// A placeholder for the Loan type, adjust as needed
-interface Loan {
-  id: string;
-  loanType: string;
-  amount: number;
-}
+import { useSelector } from 'react-redux';
+import { selectLoanTypes } from '../../master-record/redux/masterRecordSlice';
+import { Loan } from '../../loan-management/types/LoanManagement.types';
+import { Payment } from '../types/PaymentManagement.types';
 
 export interface PaymentFormData {
   employeeId: string;
   paymentDate: string;
   amountPaid: number;
   loanId: string;
+  paymentId?: string;
+  paymentType: string;
 }
 
 interface Props {
@@ -23,14 +22,29 @@ interface Props {
   onSubmit: (data: PaymentFormData) => void;
   onClose: () => void;
   loading: boolean;
+  paymentToEdit?: Payment | null;
 }
 
-const MemberPaymentForm: React.FC<Props> = ({ member, onSubmit, onClose, loading }) => {
+const MemberPaymentForm: React.FC<Props> = ({ member, onSubmit, onClose, loading, paymentToEdit }) => {
   const [amountPaid, setAmountPaid] = useState<string>('');
   const [paymentDate, setPaymentDate] = useState<string>(new Date().toISOString().slice(0, 16));
   const [loanId, setLoanId] = useState<string>('');
   const [loans, setLoans] = useState<Loan[]>([]);
   const [loansLoading, setLoansLoading] = useState<boolean>(true);
+  const [loanType, setLoanType] = useState<string>('');
+  const [paymentId, setPaymentId] = useState<string>('');
+
+  const loanTypes = useSelector(selectLoanTypes);
+
+  useEffect(() => {
+    if (paymentToEdit) {
+      setAmountPaid(paymentToEdit.amountPaid.toFixed(2));
+      setPaymentDate(new Date(paymentToEdit.paymentDate).toISOString().slice(0, 16));
+      setLoanId(paymentToEdit.loanId);
+      setLoanType(paymentToEdit.paymentType);
+      setPaymentId(paymentToEdit.paymentId);
+    }
+  }, [paymentToEdit]);
 
   useEffect(() => {
     const fetchLoans = async () => {
@@ -39,9 +53,16 @@ const MemberPaymentForm: React.FC<Props> = ({ member, onSubmit, onClose, loading
       try {
         // Assuming a service method to get loans by employee ID
         const memberLoans = await PaymentManagementService.getLoansForMember(member.employeeId);
-        setLoans(memberLoans);
-        if (memberLoans.length > 0) {
-          setLoanId(memberLoans[0].id); // Default to the first loan
+
+        const processedLoans = memberLoans.map((loan: any) => ({
+          ...loan,
+          loanType: loanTypes.find(lt => lt.loanTypeCode === loan.loanType)?.loanTypeName || loan.loanType,
+        }));
+        if (loanId === '') {
+          setLoans(processedLoans);
+        }
+        if (memberLoans.length > 0 && loanId !== '') {
+          setLoanId(memberLoans[0].loanId); // Default to the first loan
         }
       } catch (error) {
         toast.error('Failed to fetch member loans.');
@@ -50,13 +71,12 @@ const MemberPaymentForm: React.FC<Props> = ({ member, onSubmit, onClose, loading
         setLoansLoading(false);
       }
     };
-
     fetchLoans();
-  }, [member.employeeId]);
+  }, [member.employeeId, loanTypes, loanId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!amountPaid || !loanId) {
+    if (!amountPaid) {
       toast.error('Please fill in all required fields.');
       return;
     }
@@ -64,10 +84,34 @@ const MemberPaymentForm: React.FC<Props> = ({ member, onSubmit, onClose, loading
       employeeId: member.employeeId,
       paymentDate,
       amountPaid: parseFloat(amountPaid),
-      loanId,
+      loanId: loanId ?? '',
+      paymentId: paymentId ?? '',
+      paymentType: loanType ?? '',
     });
   };
 
+  const handleAmountBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    if (value) {
+      const parsedValue = parseFloat(value);
+      if (!isNaN(parsedValue)) {
+        setAmountPaid(parsedValue.toFixed(2));
+      }
+    }
+  };
+
+  const handleLoanChange = (e: string) => {
+    const loanType = getLoanTypeName(e);
+    if (loanType) setLoanType(loanType);
+    setLoanId(e);
+  };
+
+  const getLoanTypeName = (loanId: string) => {
+    const loan = loans.find(l => l.loanId === loanId);
+    return loan?.loanType || '';
+  };
+
+  console.log(loanId)
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-xl">
@@ -101,19 +145,19 @@ const MemberPaymentForm: React.FC<Props> = ({ member, onSubmit, onClose, loading
             <select
               id="loanId"
               value={loanId}
-              onChange={(e) => setLoanId(e.target.value)}
+              onChange={(e) => handleLoanChange(e.target.value)}
               className="nbs-input"
               disabled={loansLoading || loans.length === 0}
-              required
             >
+              <option value="" disabled>Select a loan</option>
               {loansLoading ? (
                 <option>Loading loans...</option>
               ) : loans.length === 0 ? (
                 <option>No active loans found</option>
               ) : (
                 loans.map((loan) => (
-                  <option key={loan.id} value={loan.id}>
-                    {loan.loanType} - (ID: {loan.id})
+                  <option key={loan.loanId} value={loan.loanId}>
+                    {loan.loanType} - (ID: {loan.loanId})
                   </option>
                 ))
               )}
@@ -127,6 +171,7 @@ const MemberPaymentForm: React.FC<Props> = ({ member, onSubmit, onClose, loading
               type="number"
               value={amountPaid}
               onChange={(e) => setAmountPaid(e.target.value)}
+              onBlur={handleAmountBlur}
               className="nbs-input"
               placeholder="0.00"
               min="0.01"

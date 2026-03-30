@@ -3,16 +3,15 @@ import { useSelector, shallowEqual } from 'react-redux';
 import { Navigate, Outlet } from 'react-router-dom';
 import { RootState } from '../redux/RootReducer';
 
-const PrivateRoute: React.FC = () => {
+const PublicRoute: React.FC = () => {
   const isAuthorized = useSelector<RootState, boolean>(({ auth }) => auth.loggedIn, shallowEqual);
 
-  if (!isAuthorized) {
-    // Redirect them to the /login page, but save the current location they were
-    // trying to go to. This allows us to send them along to that page after they login.
-    return <Navigate to="/login" />;
+  if (isAuthorized) {
+    // Redirect them to the main page if they are already logged in
+    return <Navigate to="/payment-management" />;
   }
 
   return <Outlet />;
 };
 
-export default PrivateRoute;
+export default PublicRoute;

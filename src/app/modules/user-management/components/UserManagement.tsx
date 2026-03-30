@@ -8,6 +8,7 @@ import UserManagementForm from './UserManagementForm';
 import { UserManagementService } from '../services/UserManagement.service';
 import { toast } from 'react-toastify';
 import { formatLocalStringDateAndTime, upperFirstLetter } from '../../../shared/components/helper';
+import { EditIcon, TrashIcon } from '../../../shared/components/icons';
 
 const UserManagement: React.FC = () => {
     const [users, setUsers] = useState<User[]>([]);
@@ -33,34 +34,26 @@ const UserManagement: React.FC = () => {
         fetchUsers();
     }, [fetchUsers]);
 
+    const ActionsCellRenderer = (props: { data: User }) => {
+        return (
+            <div className="flex items-center justify-center h-full space-x-2">
+                <button onClick={() => handleEdit(props.data)} title="Edit user" className="text-blue-600 hover:text-blue-800 transition">
+                    <EditIcon className="w-5 h-5" />
+                </button>
+                <button onClick={() => handleDelete(props.data.id)} title="Delete user" className="text-red-600 hover:text-red-800 transition">
+                    <TrashIcon className="w-5 h-5" />
+                </button>
+            </div>
+        );
+    };
+
     const columnDefs: ColDef[] = [
         {
             headerName: 'Actions',
             pinned: 'left',
             width: 100,
             resizable: false,
-            cellRenderer: (params: any) => (
-                <div className="flex gap-3 items-center justify-left h-full">
-                    <button
-                        onClick={() => handleEdit(params.data)}
-                        className="text-blue-600 hover:text-blue-800 transition"
-                        title="Edit user"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                    </button>
-                    <button
-                        onClick={() => handleDelete(params.data.id)}
-                        className="text-red-600 hover:text-red-800 transition"
-                        title="Delete user"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                    </button>
-                </div>
-            ),
+            cellRenderer: ActionsCellRenderer,
         },
         { field: 'firstName', headerName: 'First Name', sortable: true, filter: true },
         { field: 'lastName', headerName: 'Last Name', sortable: true, filter: true },
@@ -86,10 +79,10 @@ const UserManagement: React.FC = () => {
             valueFormatter: params => (params.value ? upperFirstLetter(params.value) : ''),
             width: 150
         },
-        { 
-            field: 'createdAt', 
-            headerName: 'Date Created', 
-            sortable: true, 
+        {
+            field: 'createdAt',
+            headerName: 'Date Created',
+            sortable: true,
             filter: true,
             valueFormatter: params => formatLocalStringDateAndTime(params.value)
         }
