@@ -37,9 +37,9 @@ const Header: React.FC = () => {
         <div className="flex items-center gap-4 w-full">
           <Link to="/" className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white rounded-sm flex items-center justify-center text-nbs-red font-bold">
-              NB
+              IGP
             </div>
-            <div className="text-lg font-semibold">National Bookstore – CPT</div>
+            <div className="text-lg font-semibold">ACE ABCC</div>
           </Link>
 
           <div className="ml-auto flex items-center gap-4">

@@ -53,15 +53,13 @@ const Sidebar: React.FC = () => {
     { path: '/user-management', label: 'User Management', icon: <UsersIcon className="w-5 h-5" />, adminOnly: true },
   ];
 
-  const activeLinkClasses = 'bg-nbs-red-dark text-nbs-text';
-  const linkClasses = 'flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-md hover:bg-nbs-red-dark/80 transition-colors duration-200';
-  const subLinkClasses = 'pl-12 pr-4 py-2 text-sm block hover:bg-nbs-red-dark/80 transition-colors duration-200';
+  const activeLinkClasses = 'bg-nbs-darkred text-white hover:bg-nbs-darkred';
+  const linkClasses = 'flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-md hover:bg-nbs-darkred/80 hover:text-white transition-colors duration-200';
+  const subLinkClasses = 'pl-12 pr-4 py-2 text-sm block hover:bg-nbs-darkred/80 transition-colors duration-200';
 
   return (
     <aside className="w-64 bg-white text-nbs-text flex flex-col border-r border-gray-200">
-      <div className="h-16 flex items-center justify-center border-b border-gray-200">
-        <h1 className="text-xl font-bold text-nbs-red text-center">CPT</h1>
-      </div>
+      <div className="h-16 flex items-center justify-center border-b border-gray-200" />
       <nav className="flex-1 p-2 space-y-1">
         {navItems.map(item => {
           if (item.adminOnly && !isAdmin) return null;

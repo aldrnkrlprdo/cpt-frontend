@@ -93,11 +93,11 @@ const Login: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-nbs-gray">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-nbs-red rounded-lg mx-auto flex items-center justify-center mb-3">
-            <span className="text-white font-display font-bold text-2xl">NB</span>
+          <div className="w-3/5 h-16 bg-nbs-red rounded-lg mx-auto flex items-center justify-center mb-3">
+            <span className="text-white font-display font-bold text-2xl">ACE ABCC</span>
           </div>
           <h2 className="text-2xl font-display font-bold text-nbs-text">Sign in</h2>
-          <p className="text-gray-600 text-sm">Cooperative Payment Tracker</p>
+          <p className="text-gray-600 text-sm">Income Generating Program</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4" aria-labelledby="login-form">

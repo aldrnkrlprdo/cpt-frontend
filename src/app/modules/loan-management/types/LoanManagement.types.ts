@@ -17,4 +17,5 @@ export interface Loan {
     lastName: string;
   };
   status: string;
+  remainingBalance: number;
 }

@@ -38,8 +38,18 @@ html, body, #root {
     @apply bg-nbs-red hover:bg-nbs-darkred text-white font-semibold py-2 px-4 rounded-md transition-colors;
   }
 
+  .nbs-button:disabled{
+    @apply bg-nbs-lightred hover:bg-nbs-lightred text-white cursor-not-allowed;
+  }
+
   .nbs-input {
     @apply w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-nbs-red/20 focus:border-nbs-red outline-none;
+  }
+}
+
+@layer utilities {
+  .hover\:text-white:hover {
+    color: inherit !important;
   }
 }
 

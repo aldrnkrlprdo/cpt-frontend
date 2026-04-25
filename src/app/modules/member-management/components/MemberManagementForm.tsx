@@ -2,17 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { Member } from '../types/MemberManagement.types';
 import { useSelector } from 'react-redux';
 import { selectBranches } from '../../master-record/redux/masterRecordSlice';
+import AnimatedInput from '../../../shared/components/AnimatedInput';
+import AnimatedSelect from '../../../shared/components/AnimatedSelect';
+import AnimatedTextarea from '../../../shared/components/AnimatedTextarea';
 
 interface Props {
-  member?: Member | null;
-  onSubmit: (data: Member) => void;
+  member: Member | null;
+  onSubmit: (data: Omit<Member, 'dateOfJoining'>) => void;
   onClose: () => void;
-  loading?: boolean;
+  loading: boolean;
 }
 
-const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, loading = false }) => {
+const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, loading }) => {
   const branches = useSelector(selectBranches);
-  const [form, setForm] = useState<Member>({
+  const [form, setForm] = useState<Omit<Member, 'dateOfJoining'> & { dateOfJoining: Date | string }>({
     employeeId: '',
     firstName: '',
     middleName: '',
@@ -20,37 +23,24 @@ const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, load
     branch: '',
     email: '',
     phoneNumber: '',
-    membershipStatus: 'active',
     address: '',
-    dateOfJoining: new Date()
+    civilStatus: 'Single',
+    membershipStatus: 'Active',
+    dateOfJoining: new Date(),
   });
 
   useEffect(() => {
     if (member) {
       setForm({
-        employeeId: member.employeeId,
-        firstName: member.firstName,
-        middleName: member.middleName || '',
-        lastName: member.lastName,
-        branch: member.branch || '',
-        email: member.email,
-        phoneNumber: member.phoneNumber || '',
-        membershipStatus: member.membershipStatus,
-        address: member.address,
-        dateOfJoining: member.dateOfJoining,
+        ...member,
+        dateOfJoining: member.dateOfJoining ? new Date(member.dateOfJoining).toISOString().split('T')[0] : '',
       });
-    } else {
-      setForm({ employeeId: '', firstName: '', middleName: '', lastName: '', branch: '', email: '', phoneNumber: '', membershipStatus: 'active', address: '', dateOfJoining: new Date() });
     }
   }, [member]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    if (name === 'dateOfJoining') {
-      setForm(prev => ({ ...prev, [name]: new Date(value) }));
-    } else {
-      setForm(prev => ({ ...prev, [name]: value }));
-    }
+    setForm(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -60,52 +50,129 @@ const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, load
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg w-full max-w-md">
+      <div className="bg-white p-6 rounded-lg w-full max-w-lg">
         <h2 className="text-xl font-bold mb-4">{member ? 'Edit Member' : 'Add New Member'}</h2>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div>
-            <input name="employeeId" value={form.employeeId} onChange={handleChange} className="nbs-input" placeholder="Employee ID" required disabled={!!member} />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <AnimatedInput
+            id="employeeId"
+            name="employeeId"
+            label="Employee ID"
+            value={form.employeeId}
+            onChange={handleChange}
+            required
+            disabled={!!member}
+          />
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <AnimatedInput
+              id="firstName"
+              name="firstName"
+              label="First Name"
+              value={form.firstName}
+              onChange={handleChange}
+              required
+            />
+            <AnimatedInput
+              id="middleName"
+              name="middleName"
+              label="Middle Name"
+              value={form.middleName}
+              onChange={handleChange}
+            />
+            <AnimatedInput
+              id="lastName"
+              name="lastName"
+              label="Last Name"
+              value={form.lastName}
+              onChange={handleChange}
+              required
+            />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <input name="firstName" value={form.firstName} onChange={handleChange} className="nbs-input" placeholder="First name" required />
-            <input name="middleName" value={form.middleName} onChange={handleChange} className="nbs-input" placeholder="Middle name" />
-            <input name="lastName" value={form.lastName} onChange={handleChange} className="nbs-input" placeholder="Last name" required />
-            <select name="branch" value={form.branch} onChange={handleChange} className="nbs-input">
-              <option value="">Select Branch</option>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <AnimatedSelect
+              id="branch"
+              name="branch"
+              label="Branch"
+              value={form.branch}
+              onChange={handleChange}
+              required
+            >
+              <option value=""></option>
               {branches.map(branch => (
                 <option key={branch.branchCode} value={branch.branchName}>{branch.branchName}</option>
               ))}
-            </select>
-          </div>
-          <div>
-            <input name="email" type="email" value={form.email} onChange={handleChange} className="nbs-input" placeholder="Email" />
-          </div>
-
-          <div>
-            <input name="phoneNumber" value={form.phoneNumber} onChange={handleChange} className="nbs-input" placeholder="Phone Number" />
-          </div>
-
-          <div>
-            <textarea name="address" value={typeof form.address === 'string' ? form.address : ''} onChange={handleChange} className="nbs-input" placeholder="Address" rows={3}></textarea>
-          </div>
-
-          <div>
-            <input name="dateOfJoining" type="date" value={form.dateOfJoining ? new Date(form.dateOfJoining).toLocaleDateString('en-CA') : ''} onChange={handleChange} className="nbs-input" placeholder="Date of Joining" />
-          </div>
-
-          <div>
-            <label className="block text-sm mb-1">Status</label>
-            <select name="membershipStatus" value={form.membershipStatus} onChange={handleChange} className="nbs-input">
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="suspended">Suspended</option>
-              <option value="resigned">Resigned</option>
-            </select>
+            </AnimatedSelect>
+            <AnimatedSelect
+              id="civilStatus"
+              name="civilStatus"
+              label="Civil Status"
+              value={form.civilStatus}
+              onChange={handleChange}
+              required
+            >
+              <option value=""></option>
+              <option value="Single">Single</option>
+              <option value="Married">Married</option>
+              <option value="Widowed">Widowed</option>
+              <option value="Divorced">Divorced</option>
+            </AnimatedSelect>
           </div>
 
-          <div className="flex justify-end gap-2 mt-4">
-            <button type="button" onClick={onClose} className="px-4 py-2 border rounded-md" disabled={loading}>Cancel</button>
-            <button type="submit" className="nbs-button" disabled={loading}>{loading ? (member ? 'Updating...' : 'Creating...') : (member ? 'Update' : 'Create')}</button>
+          <AnimatedInput
+            id="email"
+            name="email"
+            type="email"
+            label="Email"
+            value={form.email}
+            onChange={handleChange}
+          />
+
+          <AnimatedInput
+            id="phoneNumber"
+            name="phoneNumber"
+            label="Phone Number"
+            value={form.phoneNumber}
+            onChange={handleChange}
+          />
+
+          <AnimatedTextarea
+            id="address"
+            name="address"
+            label="Address"
+            value={typeof form.address === 'string' ? form.address : ''}
+            onChange={handleChange}
+            rows={2}
+          />
+
+          <AnimatedInput
+            id="dateOfJoining"
+            name="dateOfJoining"
+            type="date"
+            label="Date of Joining"
+            value={typeof form.dateOfJoining === 'string' ? form.dateOfJoining : new Date(form.dateOfJoining).toISOString().split('T')[0]}
+            onChange={handleChange}
+            required
+          />
+
+          <AnimatedSelect
+            id="membershipStatus"
+            name="membershipStatus"
+            label="Membership Status"
+            value={form.membershipStatus}
+            onChange={handleChange}
+            required
+          >
+            <option value="Active">Active</option>
+            <option value="Promoted">Promoted</option>
+            <option value="Resigned">Resigned</option>
+          </AnimatedSelect>
+
+          <div className="flex justify-end space-x-2">
+            <button type="button" onClick={onClose} className="nbs-button-secondary" disabled={loading}>Cancel</button>
+            <button type="submit" className="nbs-button" disabled={loading}>
+              {loading ? 'Saving...' : 'Save'}
+            </button>
           </div>
         </form>
       </div>

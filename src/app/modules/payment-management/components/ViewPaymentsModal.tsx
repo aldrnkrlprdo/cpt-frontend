@@ -5,8 +5,9 @@ import { Payment } from '../types/PaymentManagement.types';
 import { PaymentManagementService } from '../services/PaymentManagement.service';
 import { AgGridReact } from 'ag-grid-react';
 import { ColDef, ICellRendererParams } from 'ag-grid-community';
-import MemberPaymentForm, { PaymentFormData } from './MemberPaymentForm';
+import MemberPaymentForm from './MemberPaymentForm';
 import { EditIcon, TrashIcon } from '../../../shared/components/icons';
+import { PaymentFormData } from '../types/PaymentManagement.types';
 
 interface Props {
     member: Member;

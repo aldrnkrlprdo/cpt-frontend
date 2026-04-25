@@ -1,5 +1,7 @@
 import { User, UserRole, UserStatus } from '../types/UserManagement.types';
 import React, { useEffect, useState } from 'react';
+import AnimatedInput from '../../../shared/components/AnimatedInput';
+import AnimatedSelect from '../../../shared/components/AnimatedSelect';
 
 interface Props {
   user?: User | null;
@@ -16,7 +18,7 @@ const UserManagementForm: React.FC<Props> = ({ user, onSubmit, onClose, loading 
     id: '',
     firstName: '',
     lastName: '',
-    username: '', // added
+    username: '',
     email: '',
     role: 'User',
     status: 'Active',
@@ -31,7 +33,7 @@ const UserManagementForm: React.FC<Props> = ({ user, onSubmit, onClose, loading 
         id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
-        username: user.username, // added
+        username: user.username,
         email: user.email,
         role: user.role,
         status: user.status
@@ -41,7 +43,7 @@ const UserManagementForm: React.FC<Props> = ({ user, onSubmit, onClose, loading 
         id: '',
         firstName: '',
         lastName: '',
-        username: '', // added
+        username: '',
         email: '',
         role: 'User',
         status: 'Active',
@@ -59,79 +61,108 @@ const UserManagementForm: React.FC<Props> = ({ user, onSubmit, onClose, loading 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (form.password !== form.confirmPassword) {
-      alert("Passwords do not match."); // Or use a toast notification
+      alert("Passwords do not match.");
       return;
     }
     if (!loading) onSubmit(form);
   };
 
+  const roleSelectOptions = roleOptions.map(role => ({
+    value: role.toLowerCase(),
+    label: role
+  }));
+
+  const statusSelectOptions = statusOptions.map(status => ({
+    value: status.toLowerCase(),
+    label: status
+  }));
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg w-full max-w-md">
         <h2 className="text-xl font-bold mb-4">{user ? 'Edit User' : 'Add New User'}</h2>
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
-            <input name="firstName" value={form.firstName} onChange={handleChange} className="nbs-input" placeholder="First name" required />
-            <input name="lastName" value={form.lastName} onChange={handleChange} className="nbs-input" placeholder="Last name" required />
+            <AnimatedInput
+              id="firstName"
+              name="firstName"
+              label="First Name"
+              value={form.firstName}
+              onChange={handleChange}
+              required
+            />
+            <AnimatedInput
+              id="lastName"
+              name="lastName"
+              label="Last Name"
+              value={form.lastName}
+              onChange={handleChange}
+              required
+            />
           </div>
 
-          {/* added username field */}
-          <div>
-            <label className="block text-sm mb-1">Username</label>
-            <input name="username" value={form.username} onChange={handleChange} className="nbs-input" placeholder="Username" required />
-          </div>
+          <AnimatedInput
+            id="username"
+            name="username"
+            label="Username"
+            value={form.username}
+            onChange={handleChange}
+            required
+          />
 
-          <div>
-            <label className="block text-sm mb-1">Email</label>
-            <input name="email" type="email" value={form.email} onChange={handleChange} className="nbs-input" />
-          </div>
+          <AnimatedInput
+            id="email"
+            name="email"
+            label="Email"
+            type="email"
+            value={form.email}
+            onChange={handleChange}
+          />
 
           <div className="space-y-3">
             <label className="block text-sm font-medium">{user ? 'Change Password (optional)' : 'Password'}</label>
             <div className="grid grid-cols-2 gap-3">
-              <input
+              <AnimatedInput
+                id="password"
                 name="password"
+                label="New Password"
                 type="password"
-                value={form.password}
+                value={form.password || ''}
                 onChange={handleChange}
-                className="nbs-input"
-                placeholder="New Password"
                 required={!user}
               />
-              <input
+              <AnimatedInput
+                id="confirmPassword"
                 name="confirmPassword"
+                label="Confirm Password"
                 type="password"
-                value={form.confirmPassword}
+                value={form.confirmPassword || ''}
                 onChange={handleChange}
-                className="nbs-input"
-                placeholder="Confirm Password"
                 required={!user}
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm mb-1">Role</label>
-              <select name="role" value={form.role} onChange={handleChange} className="nbs-input">
-                {
-                  roleOptions.map((i) => (
-                    <option key={i} value={i.toLowerCase()}>{i}</option>
-                  ))
-                }
-              </select>
-            </div>
+            <AnimatedSelect
+              id="role"
+              name="role"
+              label="Role"
+              value={form.role.toLowerCase()}
+              onChange={handleChange}
+              options={roleSelectOptions}
+              required
+            />
 
-            <div>
-              <label className="block text-sm mb-1">Status</label>
-              <select name="status" value={form.status} onChange={handleChange} className="nbs-input">
-                {
-                  statusOptions.map((i) => (
-                    <option key={i} value={i.toLowerCase()}>{i}</option>
-                  ))
-                }
-              </select>
-            </div>
+            <AnimatedSelect
+              id="status"
+              name="status"
+              label="Status"
+              value={form.status.toLowerCase()}
+              onChange={handleChange}
+              options={statusSelectOptions}
+              required
+            />
           </div>
 
           <div className="flex justify-end gap-2 mt-4">

@@ -7,4 +7,17 @@ export interface Payment {
     paymentType: string;
     notes?: string;
     dateCreated: string;
+    isFullPayment?: boolean;
+    interestRebate?: number;
+}
+
+export interface PaymentFormData {
+    employeeId: string;
+    paymentDate: string;
+    amountPaid: number;
+    loanId: string;
+    paymentId: string;
+    paymentType: string;
+    isFullPayment?: boolean;
+    interestRebate?: number;
 }

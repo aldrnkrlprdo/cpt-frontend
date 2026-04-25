@@ -119,7 +119,6 @@ const BranchManagement: React.FC = () => {
                     suppressRowClickSelection={true}
                     onGridReady={fetchBranches}
                     overlayLoadingTemplate={loading ? '<span class="ag-overlay-loading-center">Loading...</span>' : ''}
-                    overlayNoRowsTemplate='<span style="padding: 10px; border: 2px solid #444; background: lightgoldenrodyellow;">No branches found</span>'
                 />
             </div>
             <BranchForm

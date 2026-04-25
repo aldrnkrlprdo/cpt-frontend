@@ -6,6 +6,7 @@ module.exports = {
         'nbs': {
           red: '#c8102e',
           darkred: '#a10a25',
+          lightred: '#f3b9ba',
           gray: '#f5f5f5',
           text: '#2d3748',
           accent: '#ffc107'

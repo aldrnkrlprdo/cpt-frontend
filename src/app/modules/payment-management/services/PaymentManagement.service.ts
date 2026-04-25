@@ -1,7 +1,7 @@
 
 import { api } from '../../../core/services/api.service';
 import { Member } from '../../member-management/types/MemberManagement.types';
-import { PaymentFormData } from '../components/MemberPaymentForm';
+import { PaymentFormData } from '../types/PaymentManagement.types';
 import { Payment } from '../types/PaymentManagement.types';
 
 const createPayment = async (payment: PaymentFormData) => {
