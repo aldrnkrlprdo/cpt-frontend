@@ -36,3 +36,7 @@
     transform: rotate(360deg);
   }
 }
+
+.nbs-button-secondary {
+  @apply px-4 py-2 bg-white border-2 border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+}

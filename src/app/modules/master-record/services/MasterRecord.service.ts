@@ -37,5 +37,21 @@ export const MasterRecordService = {
   },
   deleteBranch: async (id: string): Promise<void> => {
     await api.delete(`${BRANCH_BASE}/${id}`);
+  },
+
+  bulkUploadBranches: async (branches: Partial<Branch>[]): Promise<{ 
+    success: Branch[], 
+    failed: { member: Partial<Branch>, error: string }[] 
+  }> => {
+    const resp = await api.post(`${BRANCH_BASE}/bulk`, { branches });
+    return resp.data;
+  },
+
+  validateBulkBranches: async (branches: Partial<Branch>[]): Promise<{
+    valid: Partial<Branch>[],
+    invalid: { member: Partial<Branch>, errors: string[] }[]
+  }> => {
+    const resp = await api.post(`${BRANCH_BASE}/bulk/validate`, { branches });
+    return resp.data;
   }
 };

@@ -7,12 +7,13 @@ import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';
 import { Member } from '../../member-management/types/MemberManagement.types';
 import { PaymentManagementService } from '../../payment-management/services/PaymentManagement.service';
-import { EditIcon, PlusCircleIcon, TrashIcon } from '../../../shared/components/icons';
+import { EditIcon, EyeIcon, PlusCircleIcon, TrashIcon } from '../../../shared/components/icons';
 import LoanManagementForm from './LoanManagementForm';
 import { Loan } from '../types/LoanManagement.types';
 import { upperFirstLetter } from '../../../shared/components/helper';
 import { LoanManagementService } from '../services/LoanManagement.service';
 import { selectLoanTypes } from '../../master-record/redux/masterRecordSlice';
+import { RootState } from '../../../setup/redux/RootReducer';
 
 const LoanManagement: React.FC = () => {
     const [members, setMembers] = useState<Member[]>([]);
@@ -29,6 +30,8 @@ const LoanManagement: React.FC = () => {
     const [searchText, setSearchText] = useState('');
 
     const loanTypes = useSelector(selectLoanTypes);
+    const role = useSelector<RootState, string | undefined>(({ auth }) => auth.role);
+    const isViewer = role?.toLowerCase() === 'user';
 
     const loadMembers = useCallback(async () => {
         if (!mountedRef.current) return;
@@ -147,12 +150,23 @@ const LoanManagement: React.FC = () => {
     };
 
     const LoanActionsCellRenderer = (props: { data: Loan }) => {
+        if (isViewer) {
+            return <div className="flex items-center justify-center h-full">
+                <button
+                    onClick={() => handleEditLoanClick(props.data)}
+                    title="View Loan"
+                    className="text-blue-600 hover:text-blue-800"
+                >
+                    <EyeIcon className="w-5 h-5" />
+                </button>
+            </div>;
+        }
         return (
             <div className="flex items-center justify-center h-full space-x-2">
                 <button
                     onClick={() => handleEditLoanClick(props.data)}
                     title="Edit Loan"
-                    className="text-green-600 hover:text-green-800"
+                    className="text-blue-600 hover:text-blue-800"
                 >
                     <EditIcon className="w-5 h-5" />
                 </button>
@@ -287,6 +301,7 @@ const LoanManagement: React.FC = () => {
                                     <button
                                         onClick={handleAddLoanClick}
                                         className="nbs-button flex items-center gap-2"
+                                        disabled={isViewer}
                                     >
                                         <PlusCircleIcon className="w-5 h-5" />
                                         Add Loan
@@ -382,6 +397,7 @@ const LoanManagement: React.FC = () => {
                     onClose={handleFormClose}
                     onSubmit={handleFormSubmit}
                     loading={formLoading}
+                    isViewer={isViewer}
                 />
             )}
         </div>

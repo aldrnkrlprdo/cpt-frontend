@@ -5,16 +5,22 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { Member } from '../types/MemberManagement.types';
 import MemberManagementForm from './MemberManagementForm';
+import BulkUploadModal from './BulkUploadModal';
 import { MemberManagementService } from '../services/MemberManagement.service';
 import { toast } from 'react-toastify';
 import { formatLocalStringDate, upperFirstLetter } from '../../../shared/components/helper';
-import { EditIcon, TrashIcon } from '../../../shared/components/icons';
+import { EditIcon, EyeIcon, TrashIcon, UploadIcon } from '../../../shared/components/icons';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../setup/redux/RootReducer';
 
 const MemberManagement: React.FC = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const role = useSelector<RootState, string | undefined>(({ auth }) => auth.role);
+  const isViewer = role?.toLowerCase() === 'user';
 
   const fetchMembers = useCallback(async () => {
     setLoading(true);
@@ -31,6 +37,7 @@ const MemberManagement: React.FC = () => {
   useEffect(() => { fetchMembers(); }, [fetchMembers]);
 
   const handleEdit = (m: Member) => { setSelectedMember(m); setIsModalOpen(true); };
+  
   const handleDelete = async (id: string) => {
     const confirmDelete = window.confirm('Delete member?');
     if (!confirmDelete) return;
@@ -63,7 +70,18 @@ const MemberManagement: React.FC = () => {
     }
   };
 
+  const handleBulkUploadSuccess = () => {
+    fetchMembers();
+  };
+
   const ActionsCellRenderer = (props: { data: Member }) => {
+    if (isViewer) {
+      return <div className="flex items-center justify-center h-full space-x-2">
+        <button onClick={() => handleEdit(props.data)} title="View user" className="text-blue-600 hover:text-blue-800 transition">
+          <EyeIcon className="w-5 h-5" />
+        </button>
+      </div>;
+    }
     return (
       <div className="flex items-center justify-center h-full space-x-2">
         <button onClick={() => handleEdit(props.data)} title="Edit user" className="text-blue-600 hover:text-blue-800 transition">
@@ -110,17 +128,54 @@ const MemberManagement: React.FC = () => {
 
   return (
     <div className="p-6">
-      <div className="flex justify-between mb-4">
+      <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Employee Management</h1>
-        <button onClick={() => { setSelectedMember(null); setIsModalOpen(true); }} className="nbs-button" disabled={loading}>Add New Member</button>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => setIsBulkUploadOpen(true)} 
+            className="nbs-button-secondary flex items-center gap-2" 
+            disabled={loading || isViewer}
+            title="Bulk Upload Members"
+          >
+            <UploadIcon className="w-5 h-5" />
+            Bulk Upload
+          </button>
+          <button 
+            onClick={() => { setSelectedMember(null); setIsModalOpen(true); }} 
+            className="nbs-button" 
+            disabled={loading || isViewer}
+          >
+            Add New Member
+          </button>
+        </div>
       </div>
 
       <div className="ag-theme-alpine h-[600px] w-full">
-        <AgGridReact rowData={members} columnDefs={columnDefs} pagination paginationPageSize={10} />
+        <AgGridReact 
+          rowData={members} 
+          columnDefs={columnDefs} 
+          pagination 
+          paginationPageSize={10}
+          overlayLoadingTemplate={loading ? '<span class="ag-overlay-loading-center">Loading...</span>' : ''}
+          overlayNoRowsTemplate='<span style="padding: 10px; border: 2px solid #444; background: lightgoldenrodyellow;">No members found</span>'
+        />
       </div>
 
       {isModalOpen && (
-        <MemberManagementForm member={selectedMember} onSubmit={handleSubmit} onClose={() => { setIsModalOpen(false); setSelectedMember(null); }} loading={loading} />
+        <MemberManagementForm 
+          member={selectedMember} 
+          onSubmit={handleSubmit} 
+          onClose={() => { setIsModalOpen(false); setSelectedMember(null); }} 
+          loading={loading} 
+          isViewer={isViewer} 
+        />
+      )}
+
+      {isBulkUploadOpen && (
+        <BulkUploadModal
+          onClose={() => setIsBulkUploadOpen(false)}
+          onSuccess={handleBulkUploadSuccess}
+        />
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 
 import { api } from '../../../core/services/api.service';
-import { Loan } from '../types/LoanManagement.types';
+import { Loan, BulkLoanUploadData, BulkUploadResult } from '../types/LoanManagement.types';
 
 const BASE = '/loans';
 
@@ -27,5 +27,15 @@ export const LoanManagementService = {
 
   deleteLoan: async (id: string): Promise<void> => {
     await api.delete(`${BASE}/${id}`);
+  },
+
+  bulkUploadLoans: async (loans: BulkLoanUploadData[]): Promise<BulkUploadResult> => {
+    const resp = await api.post(`${BASE}/bulk-upload`, { loans });
+    return resp.data;
+  },
+
+  downloadTemplate: async (): Promise<Blob> => {
+    const resp = await api.get(`${BASE}/template`, { responseType: 'blob' });
+    return resp.data;
   }
 };

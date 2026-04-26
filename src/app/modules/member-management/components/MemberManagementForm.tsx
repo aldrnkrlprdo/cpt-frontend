@@ -11,9 +11,10 @@ interface Props {
   onSubmit: (data: Omit<Member, 'dateOfJoining'>) => void;
   onClose: () => void;
   loading: boolean;
+  isViewer?: boolean;
 }
 
-const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, loading }) => {
+const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, loading, isViewer = false }) => {
   const branches = useSelector(selectBranches);
   const [form, setForm] = useState<Omit<Member, 'dateOfJoining'> & { dateOfJoining: Date | string }>({
     employeeId: '',
@@ -60,7 +61,7 @@ const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, load
             value={form.employeeId}
             onChange={handleChange}
             required
-            disabled={!!member}
+            disabled={!!member || isViewer}
           />
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -71,6 +72,7 @@ const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, load
               value={form.firstName}
               onChange={handleChange}
               required
+              disabled={isViewer}
             />
             <AnimatedInput
               id="middleName"
@@ -78,6 +80,7 @@ const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, load
               label="Middle Name"
               value={form.middleName}
               onChange={handleChange}
+              disabled={isViewer}
             />
             <AnimatedInput
               id="lastName"
@@ -86,6 +89,7 @@ const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, load
               value={form.lastName}
               onChange={handleChange}
               required
+              disabled={isViewer}
             />
           </div>
 
@@ -97,6 +101,7 @@ const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, load
               value={form.branch}
               onChange={handleChange}
               required
+              disabled={isViewer}
             >
               <option value=""></option>
               {branches.map(branch => (
@@ -110,6 +115,7 @@ const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, load
               value={form.civilStatus}
               onChange={handleChange}
               required
+              disabled={isViewer}
             >
               <option value=""></option>
               <option value="Single">Single</option>
@@ -126,6 +132,7 @@ const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, load
             label="Email"
             value={form.email}
             onChange={handleChange}
+              disabled={isViewer}
           />
 
           <AnimatedInput
@@ -134,6 +141,7 @@ const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, load
             label="Phone Number"
             value={form.phoneNumber}
             onChange={handleChange}
+              disabled={isViewer}
           />
 
           <AnimatedTextarea
@@ -143,6 +151,7 @@ const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, load
             value={typeof form.address === 'string' ? form.address : ''}
             onChange={handleChange}
             rows={2}
+              disabled={isViewer}
           />
 
           <AnimatedInput
@@ -153,6 +162,7 @@ const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, load
             value={typeof form.dateOfJoining === 'string' ? form.dateOfJoining : new Date(form.dateOfJoining).toISOString().split('T')[0]}
             onChange={handleChange}
             required
+              disabled={isViewer}
           />
 
           <AnimatedSelect
@@ -162,6 +172,7 @@ const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, load
             value={form.membershipStatus}
             onChange={handleChange}
             required
+              disabled={isViewer}
           >
             <option value="Active">Active</option>
             <option value="Promoted">Promoted</option>
@@ -170,7 +181,7 @@ const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, load
 
           <div className="flex justify-end space-x-2">
             <button type="button" onClick={onClose} className="nbs-button-secondary" disabled={loading}>Cancel</button>
-            <button type="submit" className="nbs-button" disabled={loading}>
+            <button type="submit" className="nbs-button" disabled={loading || isViewer}>
               {loading ? 'Saving...' : 'Save'}
             </button>
           </div>

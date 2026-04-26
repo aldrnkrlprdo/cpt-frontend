@@ -1,15 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
 import { AgGridReact } from 'ag-grid-react';
-import { ColDef } from 'ag-grid-community';
 import { toast } from 'react-toastify';
-import { MasterRecordService } from '../../services/MasterRecord.service';
 import { Branch } from '../../types/MasterRecord.types';
+import { PlusCircleIcon, EditIcon, TrashIcon, UploadIcon } from '../../../../shared/components/icons';
+import { MasterRecordService } from '../../services/MasterRecord.service';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ColDef } from 'ag-grid-community';
 import BranchForm from './BranchForm';
-import { PlusCircleIcon, EditIcon, TrashIcon } from '../../../../shared/components/icons';
+import BranchBulkUploadModal from './BranchBulkUploadModal';
 
 const BranchManagement: React.FC = () => {
     const [branches, setBranches] = useState<Branch[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
     const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -67,6 +69,10 @@ const BranchManagement: React.FC = () => {
         }
     };
 
+    const handleBulkUploadSuccess = () => {
+        fetchBranches();
+    };
+
     const columnDefs: ColDef[] = [
         {
             headerName: 'Actions',
@@ -94,16 +100,24 @@ const BranchManagement: React.FC = () => {
         <div className="p-4">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">Branch Management</h2>
-                <button
-                    onClick={() => {
-                        setSelectedBranch(null);
-                        setIsModalOpen(true);
-                    }}
-                    className="flex items-center gap-2 nbs-button"
-                >
-                    <PlusCircleIcon className="w-5 h-5" />
-                    Add New Branch
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setIsBulkUploadOpen(true)}
+                        className="flex items-center gap-2 nbs-button-secondary"
+                    >
+                        <UploadIcon className="w-5 h-5" /> Bulk Upload
+                    </button>
+                    <button
+                        onClick={() => {
+                            setSelectedBranch(null);
+                            setIsModalOpen(true);
+                        }}
+                        className="flex items-center gap-2 nbs-button"
+                    >
+                        <PlusCircleIcon className="w-5 h-5" />
+                        Add New Branch
+                    </button>
+                </div>
             </div>
             <div className="ag-theme-alpine" style={{ height: 'calc(100vh - 300px)', width: '100%' }}>
                 <AgGridReact
@@ -126,6 +140,11 @@ const BranchManagement: React.FC = () => {
                 onClose={() => setIsModalOpen(false)}
                 onSubmit={handleFormSubmit}
                 initialData={selectedBranch}
+            />
+            <BranchBulkUploadModal
+                isOpen={isBulkUploadOpen}
+                onClose={() => setIsBulkUploadOpen(false)}
+                onSuccess={handleBulkUploadSuccess}
             />
         </div>
     );

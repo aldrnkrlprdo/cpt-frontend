@@ -7,11 +7,12 @@ import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';
 import { Member } from '../../member-management/types/MemberManagement.types';
 import { PaymentManagementService } from '../services/PaymentManagement.service';
-import { EditIcon, PlusCircleIcon, TrashIcon } from '../../../shared/components/icons';
+import { EditIcon, EyeIcon, PlusCircleIcon, TrashIcon } from '../../../shared/components/icons';
 import MemberPaymentForm from './MemberPaymentForm';
 import { Payment } from '../types/PaymentManagement.types';
 import { upperFirstLetter } from '../../../shared/components/helper';
 import { selectLoanTypes } from '../../master-record/redux/masterRecordSlice';
+import { RootState } from '../../../setup/redux/RootReducer';
 
 const PaymentManagement: React.FC = () => {
     const [members, setMembers] = useState<Member[]>([]);
@@ -28,6 +29,8 @@ const PaymentManagement: React.FC = () => {
     const [searchText, setSearchText] = useState('');
 
     const loanTypes = useSelector(selectLoanTypes);
+    const role = useSelector<RootState, string | undefined>(({ auth }) => auth.role);
+    const isViewer = role?.toLowerCase() === 'user';
 
     const loadMembers = useCallback(async () => {
         if (!mountedRef.current) return;
@@ -146,6 +149,17 @@ const PaymentManagement: React.FC = () => {
     };
 
     const PaymentActionsCellRenderer = (props: { data: Payment }) => {
+        if (isViewer) {
+            return <div className="flex items-center justify-center h-full space-x-2">
+                <button
+                    onClick={() => handleEditPaymentClick(props.data)}
+                    title="View Payment"
+                    className="text-blue-600 hover:text-blue-800"
+                >
+                    <EyeIcon className="w-5 h-5" />
+                </button>
+            </div>;
+        }
         return (
             <div className="flex items-center justify-center h-full space-x-2">
                 <button
@@ -192,17 +206,34 @@ const PaymentManagement: React.FC = () => {
         { headerName: 'Loan ID', field: 'loanId', width: 150 },
         { headerName: 'Payment Type', field: 'paymentType', width: 150 },
         {
-            headerName: 'Payment Date',
-            field: 'paymentDate',
-            width: 180,
-            valueFormatter: (params) => params.value.split('T')[0],
-        },
-        {
             headerName: 'Amount Paid',
             field: 'amountPaid',
             width: 150,
             valueFormatter: (params) =>
                 `₱${params.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        },
+        {
+            headerName: 'Interest Rebate',
+            field: 'interestRebate',
+            width: 150,
+            valueFormatter: (params) =>
+                `₱${params.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        },
+        {
+            headerName: 'Notes',
+            field: 'notes',
+            width: 200,
+            cellRenderer: (params: any) => (
+                <div className="truncate" title={params.value || ''}>
+                    {params.value || '-'}
+                </div>
+            ),
+        },
+        {
+            headerName: 'Payment Date',
+            field: 'paymentDate',
+            width: 180,
+            valueFormatter: (params) => params.value.split('T')[0],
         },
         {
             headerName: 'Date Created',
@@ -274,6 +305,7 @@ const PaymentManagement: React.FC = () => {
                                     <button
                                         onClick={handleAddPaymentClick}
                                         className="nbs-button flex items-center gap-2"
+                                        disabled={isViewer}
                                     >
                                         <PlusCircleIcon className="w-5 h-5" />
                                         Add Payment
@@ -369,6 +401,7 @@ const PaymentManagement: React.FC = () => {
                     onClose={handleFormClose}
                     onSubmit={handleFormSubmit}
                     loading={formLoading}
+                    isViewer={isViewer}
                 />
             )}
         </div>

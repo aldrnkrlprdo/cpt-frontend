@@ -19,3 +19,26 @@ export interface Loan {
   status: string;
   remainingBalance: number;
 }
+export interface BulkLoanUploadData {
+  employeeId: string;
+  branch: string;
+  loanType: string;
+  loanDate: string;
+  loanAmount: number;
+  maturityDate: string;
+  loanTerm: number;
+  interest: number;
+  status?: string;
+}
+
+export interface BulkUploadResult {
+  success: number;
+  failed: number;
+  errors: BulkUploadError[];
+}
+
+export interface BulkUploadError {
+  row: number;
+  employeeId: string;
+  error: string;
+}

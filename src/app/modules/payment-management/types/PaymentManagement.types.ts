@@ -18,6 +18,7 @@ export interface PaymentFormData {
     loanId: string;
     paymentId: string;
     paymentType: string;
+    notes?: string;
     isFullPayment?: boolean;
     interestRebate?: number;
 }

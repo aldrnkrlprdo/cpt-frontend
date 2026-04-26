@@ -26,10 +26,28 @@ const deleteMember = async (employeeId: string): Promise<void> => {
   await api.delete(`/members/${employeeId}`);
 };
 
+const bulkUploadMembers = async (members: Partial<Member>[]): Promise<{ 
+  success: Member[], 
+  failed: { member: Partial<Member>, error: string }[] 
+}> => {
+  const resp = await api.post('/members/bulk', { members });
+  return resp.data;
+};
+
+const validateBulkUpload = async (members: Partial<Member>[]): Promise<{
+  valid: Partial<Member>[],
+  invalid: { member: Partial<Member>, errors: string[] }[]
+}> => {
+  const resp = await api.post('/members/bulk/validate', { members });
+  return resp.data;
+};
+
 export const MemberManagementService = {
   getMembers,
   getMemberById,
   createMember,
   updateMember,
   deleteMember,
+  bulkUploadMembers,
+  validateBulkUpload,
 };
