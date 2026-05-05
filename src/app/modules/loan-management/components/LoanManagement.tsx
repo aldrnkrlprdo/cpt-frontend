@@ -1,19 +1,21 @@
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
-import { AgGridReact } from 'ag-grid-react';
-import { ColDef } from 'ag-grid-community';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';
-import { Member } from '../../member-management/types/MemberManagement.types';
-import { PaymentManagementService } from '../../payment-management/services/PaymentManagement.service';
-import { EditIcon, EyeIcon, PlusCircleIcon, TrashIcon } from '../../../shared/components/icons';
-import LoanManagementForm from './LoanManagementForm';
-import { Loan } from '../types/LoanManagement.types';
+import { AgGridReact } from 'ag-grid-react';
+import { ColDef } from 'ag-grid-community';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
+
 import { upperFirstLetter } from '../../../shared/components/helper';
-import { LoanManagementService } from '../services/LoanManagement.service';
-import { selectLoanTypes } from '../../master-record/redux/masterRecordSlice';
+import { Member } from '../../member-management/types/MemberManagement.types';
+import { EditIcon, EyeIcon, PlusCircleIcon, TrashIcon, UploadIcon } from '../../../shared/components/icons';
 import { RootState } from '../../../setup/redux/RootReducer';
+import { PaymentManagementService } from '../../payment-management/services/PaymentManagement.service';
+import { Loan } from '../types/LoanManagement.types';
+import { selectLoanTypes } from '../../master-record/redux/masterRecordSlice';
+import { LoanManagementService } from '../services/LoanManagement.service';
+import LoanManagementForm from './LoanManagementForm';
+import LoanBulkUpload from './LoanBulkUpload';
 
 const LoanManagement: React.FC = () => {
     const [members, setMembers] = useState<Member[]>([]);
@@ -24,6 +26,7 @@ const LoanManagement: React.FC = () => {
     const [loans, setLoans] = useState<Loan[]>([]);
     const [loansLoading, setLoansLoading] = useState<boolean>(false);
     const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
+    const [showBulkUpload, setShowBulkUpload] = useState(false);
 
     const mountedRef = useRef(true);
     const [searchBy, setSearchBy] = useState('lastName');
@@ -149,17 +152,24 @@ const LoanManagement: React.FC = () => {
         loadMembers();
     };
 
+    const handleBulkUploadSuccess = () => {
+        // Reload members to reflect any new loans
+        loadMembers();
+    };
+
     const LoanActionsCellRenderer = (props: { data: Loan }) => {
         if (isViewer) {
-            return <div className="flex items-center justify-center h-full">
-                <button
-                    onClick={() => handleEditLoanClick(props.data)}
-                    title="View Loan"
-                    className="text-blue-600 hover:text-blue-800"
-                >
-                    <EyeIcon className="w-5 h-5" />
-                </button>
-            </div>;
+            return (
+                <div className="flex items-center justify-center h-full">
+                    <button
+                        onClick={() => handleEditLoanClick(props.data)}
+                        title="View Loan"
+                        className="text-blue-600 hover:text-blue-800"
+                    >
+                        <EyeIcon className="w-5 h-5" />
+                    </button>
+                </div>
+            );
         }
         return (
             <div className="flex items-center justify-center h-full space-x-2">
@@ -195,53 +205,80 @@ const LoanManagement: React.FC = () => {
     const loanColumnDefs: ColDef[] = [
         {
             headerName: 'Actions',
-            pinned: 'left',
+            field: 'actions',
+            width: 120,
             cellRenderer: LoanActionsCellRenderer,
-            width: 100,
-            resizable: false,
             sortable: false,
             filter: false,
+            pinned: 'left',
         },
-        { headerName: 'Loan ID', field: 'loanId', sortable: true, filter: true, width: 150 },
-        { headerName: 'Loan Type', field: 'loanType', sortable: true, filter: true, width: 150 },
+        { headerName: 'Loan ID', field: 'loanId', width: 150 },
+        { headerName: 'Loan Type', field: 'loanType', width: 150 },
         {
             headerName: 'Loan Amount',
             field: 'loanAmount',
-            sortable: true,
-            filter: true,
-            valueFormatter: (params) => params.data.loanAmount.toFixed(2),
-            width: 130,
+            width: 150,
+            valueFormatter: (params) =>
+                `₱${params.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
         },
         {
             headerName: 'Monthly Payment',
             field: 'monthlyPayment',
-            sortable: true,
-            filter: true,
-            valueFormatter: (params) => params.data.monthlyPayment.toFixed(2),
             width: 150,
+            valueFormatter: (params) =>
+                `₱${params.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
         },
         {
             headerName: 'Remaining Balance',
             field: 'remainingBalance',
-            sortable: true,
-            filter: true,
-            valueFormatter: (params) => params.data.remainingBalance.toFixed(2),
             width: 160,
+            valueFormatter: (params) =>
+                `₱${params.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
         },
-        { headerName: 'Status', field: 'status', sortable: true, filter: true, width: 120 },
+        {
+            headerName: 'Total Payable',
+            field: 'totalPayable',
+            width: 140,
+            valueFormatter: (params) =>
+                `₱${params.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        },
+        { headerName: 'Loan Term', field: 'loanTerm', width: 110 },
+        {
+            headerName: 'Interest',
+            field: 'interest',
+            width: 100,
+            valueFormatter: (params) => `${params.value}%`,
+        },
+        { headerName: 'Status', field: 'status', width: 120 },
         {
             headerName: 'Loan Date',
             field: 'loanDate',
-            sortable: true,
-            filter: true,
-            valueFormatter: (params) => params.data.loanDate.split('T')[0],
-            width: 120,
+            width: 180,
+            valueFormatter: (params) => params.value.split('T')[0],
+        },
+        {
+            headerName: 'Maturity Date',
+            field: 'maturityDate',
+            width: 180,
+            valueFormatter: (params) => params.value.split('T')[0],
         },
     ];
 
     return (
         <div className="h-full flex flex-col p-6 bg-gray-50">
-            <h1 className="text-2xl font-bold mb-6">Loan Management</h1>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold">Loan Management</h1>
+                {!isViewer && (
+                    <button
+                        onClick={() => setShowBulkUpload(true)}
+                        className="nbs-button flex items-center gap-2"
+                        title="Bulk Upload Loans"
+                    >
+                        <UploadIcon className="w-5 h-5" />
+                        Bulk Upload
+                    </button>
+                )}
+            </div>
 
             <div className="flex-1 flex gap-6 overflow-hidden">
                 {/* Left Panel - Members List */}
@@ -280,6 +317,7 @@ const LoanManagement: React.FC = () => {
                                 defaultColDef={{ sortable: true, filter: true, resizable: true }}
                                 pagination={true}
                                 paginationPageSize={20}
+                                paginationPageSizeSelector={[10, 20, 50, 100]}
                                 suppressRowClickSelection={true}
                                 overlayLoadingTemplate='<span class="ag-overlay-loading-center">Please wait while your rows are loading</span>'
                                 animateRows={true}
@@ -290,7 +328,7 @@ const LoanManagement: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Right Panel - Member Details and Loans */}
+                {/* Right Panel - Member Details and Loan History */}
                 <div className="flex-1 flex flex-col border-2 rounded-lg bg-white shadow overflow-hidden">
                     {selectedMember ? (
                         <>
@@ -298,14 +336,15 @@ const LoanManagement: React.FC = () => {
                             <div className="p-6 bg-gray-50">
                                 <div className="flex justify-between items-start mb-4">
                                     <h2 className="text-lg font-semibold">Member Details</h2>
-                                    <button
-                                        onClick={handleAddLoanClick}
-                                        className="nbs-button flex items-center gap-2"
-                                        disabled={isViewer}
-                                    >
-                                        <PlusCircleIcon className="w-5 h-5" />
-                                        Add Loan
-                                    </button>
+                                    {!isViewer && (
+                                        <button
+                                            onClick={handleAddLoanClick}
+                                            className="nbs-button flex items-center gap-2"
+                                        >
+                                            <PlusCircleIcon className="w-5 h-5" />
+                                            Add Loan
+                                        </button>
+                                    )}
                                 </div>
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                                     <div>
@@ -320,7 +359,7 @@ const LoanManagement: React.FC = () => {
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-600">Email</p>
-                                        <p className="font-medium">{selectedMember.email}</p>
+                                        <p className="font-medium">{selectedMember.email || '-'}</p>
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-600">Branch</p>
@@ -334,12 +373,12 @@ const LoanManagement: React.FC = () => {
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-600">Contact Number</p>
-                                        <p className="font-medium">{selectedMember.phoneNumber}</p>
+                                        <p className="font-medium">{selectedMember.phoneNumber || '-'}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Loans List Section */}
+                            {/* Loan History Section */}
                             <div className="flex-1 flex flex-col overflow-hidden">
                                 <div className="p-6">
                                     <h2 className="text-lg font-semibold">Loan History</h2>
@@ -369,6 +408,7 @@ const LoanManagement: React.FC = () => {
                                                 defaultColDef={{ sortable: true, filter: true, resizable: true }}
                                                 pagination={true}
                                                 paginationPageSize={10}
+                                                paginationPageSizeSelector={[10, 20, 50, 100]}
                                                 suppressRowClickSelection={true}
                                                 overlayLoadingTemplate='<span class="ag-overlay-loading-center">Please wait while your rows are loading</span>'
                                                 animateRows={true}
@@ -394,10 +434,18 @@ const LoanManagement: React.FC = () => {
                 <LoanManagementForm
                     member={selectedMember}
                     loan={selectedLoan || undefined}
-                    onClose={handleFormClose}
                     onSubmit={handleFormSubmit}
+                    onClose={handleFormClose}
                     loading={formLoading}
                     isViewer={isViewer}
+                />
+            )}
+
+            {/* Bulk Upload Modal */}
+            {showBulkUpload && (
+                <LoanBulkUpload
+                    onClose={() => setShowBulkUpload(false)}
+                    onSuccess={handleBulkUploadSuccess}
                 />
             )}
         </div>

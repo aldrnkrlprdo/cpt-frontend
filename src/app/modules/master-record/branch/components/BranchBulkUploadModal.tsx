@@ -163,8 +163,8 @@ const BranchBulkUploadModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) 
   const downloadTemplate = () => {
     const template = [
       {
-        'Branch Code': 'BR001',
-        'Branch Name': 'Main Branch',
+        'Branch Code': '000001',
+        'Branch Name': 'Ali Mall',
       }
     ];
 
@@ -278,7 +278,7 @@ const BranchBulkUploadModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) 
         <div className="mb-6">
           <button
             onClick={downloadTemplate}
-            className="nbs-button-secondary"
+            className="nbs-button-secondary underline"
             disabled={isProcessing}
           >
             📥 Download Template
@@ -304,7 +304,7 @@ const BranchBulkUploadModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) 
               disabled={!file || isProcessing}
               className="nbs-button"
             >
-              {isProcessing ? 'Processing...' : 'Parse File'}
+              {isProcessing ? 'Processing...' : 'Validate File'}
             </button>
           </div>
           {file && (

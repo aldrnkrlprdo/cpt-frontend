@@ -57,30 +57,22 @@ const LoanManagementForm: React.FC<Props> = ({ member, loan, onSubmit, onClose, 
   }, [loanDate, loanTerm]);
 
   useEffect(() => {
-    if (loanAmount && loanTerm && interestRate) {
-      const principal = parseFloat(loanAmount);
-      const rate = parseFloat(interestRate) / 100;
-      const term = parseInt(loanTerm);
+  if (loanAmount && loanTerm && interestRate) {
+    const principal = parseFloat(loanAmount);
+    const rate = parseFloat(interestRate) / 100; // monthly rate
+    const term = parseInt(loanTerm);
 
-      if (principal > 0 && rate >= 0 && term > 0) {
-        // Calculate total interest
-        const interest = principal * rate * (term / 12);
-        setTotalInterest(interest);
+    if (principal > 0 && rate >= 0 && term > 0) {
+      const interest = principal * rate * term;
+      const total = principal + interest;
+      const monthly = total / term;
 
-        // Calculate total payable
-        const total = principal + interest;
-        setTotalPayable(total);
-
-        // Calculate monthly payment
-        const monthly = total / term;
-        setMonthlyPayment(monthly);
-      } else {
-        setMonthlyPayment(0);
-        setTotalPayable(0);
-        setTotalInterest(0);
-      }
+      setTotalInterest(interest);
+      setTotalPayable(total);
+      setMonthlyPayment(monthly);
     }
-  }, [loanAmount, loanTerm, interestRate]);
+  }
+}, [loanAmount, loanTerm, interestRate]);
 
   const handleLoanTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedCode = e.target.value;

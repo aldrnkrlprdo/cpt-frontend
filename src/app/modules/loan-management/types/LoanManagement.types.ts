@@ -20,6 +20,7 @@ export interface Loan {
   remainingBalance: number;
 }
 export interface BulkLoanUploadData {
+  loanId?: string; // Add optional loanId field
   employeeId: string;
   branch: string;
   loanType: string;
@@ -32,13 +33,44 @@ export interface BulkLoanUploadData {
 }
 
 export interface BulkUploadResult {
-  success: number;
-  failed: number;
-  errors: BulkUploadError[];
+  message: string;
+  successCount: number;
+  failedCount: number;
+  failed: Array<{
+    loan: BulkLoanUploadData;
+    error: BulkUploadError;
+  }>;
 }
 
 export interface BulkUploadError {
   row: number;
   employeeId: string;
-  error: string;
+  loanId: string;
+  message: string;
+}
+
+export interface ValidationError {
+    row: number;
+    message: string;
+    loanId?: string;
+    employeeId?: string;
+    errors?: string[];
+}
+
+export interface ParsedLoan {
+    loanId: string;
+    employeeId: string;
+    branch: string;
+    loanType: string;
+    loanDate: string;
+    loanAmount: number;
+    maturityDate: string;
+    loanTerm: number;
+    interest: number;
+    principalBalance?: number;
+    interestBalance?: number;
+    totalBalance?: number;
+    amountPaid?: number;
+    status?: string;
+    notes?: string;
 }

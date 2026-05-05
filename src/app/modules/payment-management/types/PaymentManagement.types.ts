@@ -22,3 +22,52 @@ export interface PaymentFormData {
     isFullPayment?: boolean;
     interestRebate?: number;
 }
+
+export interface ValidationError {
+    row: number;
+    employeeId?: string;
+    loanId?: string;
+    paymentId?: string;
+    errors?: string[];
+    message?: string;
+}
+
+export interface ParsedPayment {
+    employeeId: string;
+    loanId: string;
+    paymentId: string;
+    paymentDate: string;
+    amountPaid: number;
+    paymentType: string;
+    isFullPayment: boolean;
+    interestRebate: number;
+    notes?: string;
+}
+
+export interface BulkPaymentUploadData {
+    employeeId: string;
+    loanId: string;
+    paymentId: string;
+    paymentDate: string;
+    amountPaid: number;
+    paymentType: string;
+    isFullPayment: boolean;
+    interestRebate?: number;
+    notes?: string;
+}
+
+export interface BulkUploadError {
+    row: number;
+    employeeId?: string;
+    loanId?: string;
+    paymentId?: string;
+    amountPaid?: number;
+    paymentType?: string;
+    message: string;
+}
+
+export interface BulkUploadResult {
+    success: number;
+    failed: number;
+    errors: BulkUploadError[];
+}

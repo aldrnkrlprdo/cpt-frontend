@@ -7,12 +7,13 @@ import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';
 import { Member } from '../../member-management/types/MemberManagement.types';
 import { PaymentManagementService } from '../services/PaymentManagement.service';
-import { EditIcon, EyeIcon, PlusCircleIcon, TrashIcon } from '../../../shared/components/icons';
+import { EditIcon, EyeIcon, PlusCircleIcon, TrashIcon, UploadIcon } from '../../../shared/components/icons';
 import MemberPaymentForm from './MemberPaymentForm';
 import { Payment } from '../types/PaymentManagement.types';
 import { upperFirstLetter } from '../../../shared/components/helper';
 import { selectLoanTypes } from '../../master-record/redux/masterRecordSlice';
 import { RootState } from '../../../setup/redux/RootReducer';
+import PaymentBulkUpload from './PaymentBulkUpload';
 
 const PaymentManagement: React.FC = () => {
     const [members, setMembers] = useState<Member[]>([]);
@@ -23,6 +24,7 @@ const PaymentManagement: React.FC = () => {
     const [payments, setPayments] = useState<Payment[]>([]);
     const [paymentsLoading, setPaymentsLoading] = useState<boolean>(false);
     const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
+    const [showBulkUploadModal, setShowBulkUploadModal] = useState(false);
 
     const mountedRef = useRef(true);
     const [searchBy, setSearchBy] = useState('lastName');
@@ -243,9 +245,26 @@ const PaymentManagement: React.FC = () => {
         },
     ];
 
+    // Add handler function after handleFormSubmit
+    const handleBulkUploadSuccess = () => {
+        toast.success('Bulk upload completed successfully!');
+        if (selectedMember) {
+            loadPaymentsForMember(selectedMember.employeeId);
+        }
+    };
+
     return (
         <div className="h-full flex flex-col p-6 bg-gray-50">
-            <h1 className="text-2xl font-bold mb-6">Payment Management</h1>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold">Payment Management</h1>
+
+                <button
+                    onClick={() => setShowBulkUploadModal(true)}
+                    className="nbs-button flex items-center gap-2"
+                >
+                    <UploadIcon className="w-5 h-5" /> Bulk Upload
+                </button>
+            </div>
 
             <div className="flex-1 flex gap-6 overflow-hidden">
                 {/* Left Panel - Members List */}
@@ -283,7 +302,8 @@ const PaymentManagement: React.FC = () => {
                                 columnDefs={memberColumnDefs}
                                 defaultColDef={{ sortable: true, filter: true, resizable: true }}
                                 pagination={true}
-                                paginationPageSize={20}
+                                paginationPageSize={10}
+                                paginationPageSizeSelector={[10, 20, 50, 100]}
                                 suppressRowClickSelection={true}
                                 overlayLoadingTemplate='<span class="ag-overlay-loading-center">Please wait while your rows are loading</span>'
                                 animateRows={true}
@@ -324,7 +344,7 @@ const PaymentManagement: React.FC = () => {
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-600">Email</p>
-                                        <p className="font-medium">{selectedMember.email}</p>
+                                        <p className="font-medium">{selectedMember.email || '-'}</p>
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-600">Branch</p>
@@ -338,7 +358,7 @@ const PaymentManagement: React.FC = () => {
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-600">Contact Number</p>
-                                        <p className="font-medium">{selectedMember.phoneNumber}</p>
+                                        <p className="font-medium">{selectedMember.phoneNumber || '-'}</p>
                                     </div>
                                 </div>
                             </div>
@@ -373,6 +393,7 @@ const PaymentManagement: React.FC = () => {
                                                 defaultColDef={{ sortable: true, filter: true, resizable: true }}
                                                 pagination={true}
                                                 paginationPageSize={10}
+                                                paginationPageSizeSelector={[10, 20, 50, 100]}
                                                 suppressRowClickSelection={true}
                                                 overlayLoadingTemplate='<span class="ag-overlay-loading-center">Please wait while your rows are loading</span>'
                                                 animateRows={true}
@@ -402,6 +423,13 @@ const PaymentManagement: React.FC = () => {
                     onSubmit={handleFormSubmit}
                     loading={formLoading}
                     isViewer={isViewer}
+                />
+            )}
+
+            {showBulkUploadModal && (
+                <PaymentBulkUpload
+                    onClose={() => setShowBulkUploadModal(false)}
+                    onSuccess={handleBulkUploadSuccess}
                 />
             )}
         </div>

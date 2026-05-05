@@ -11,7 +11,7 @@ const PaymentManagement = lazy(() => import('../../modules/payment-management/co
 const LoanManagement = lazy(() => import('../../modules/loan-management/components/LoanManagement'));
 const UserManagement = lazy(() => import('../../modules/user-management/components/UserManagement'));
 const Profile = lazy(() => import('../../modules/profile/components/Profile'));
-const LoanTypeManagement = lazy(() => import('../../modules/master-record/branch/components/LoanTypeManagement'));
+const LoanTypeManagement = lazy(() => import('../../modules/master-record/loan-type/components/LoanTypeManagement'));
 const BranchManagement = lazy(() => import('../../modules/master-record/branch/components/BranchManagement'));
 const ReportsPage = lazy(() => import('../../modules/reports/components/ReportsPage'));
 

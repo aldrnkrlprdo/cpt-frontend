@@ -180,6 +180,7 @@ const UserManagement: React.FC = () => {
                     columnDefs={columnDefs}
                     pagination={true}
                     paginationPageSize={10}
+                    paginationPageSizeSelector={[10, 20, 50, 100]}
                     loadingOverlayComponent={'Loading...'}
                     overlayLoadingTemplate={
                         '<span class="ag-overlay-loading-center">Loading...</span>'

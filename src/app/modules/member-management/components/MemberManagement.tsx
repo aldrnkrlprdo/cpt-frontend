@@ -133,7 +133,7 @@ const MemberManagement: React.FC = () => {
         <div className="flex gap-2">
           <button 
             onClick={() => setIsBulkUploadOpen(true)} 
-            className="nbs-button-secondary flex items-center gap-2" 
+            className="nbs-button flex items-center gap-2"
             disabled={loading || isViewer}
             title="Bulk Upload Members"
           >
@@ -156,8 +156,8 @@ const MemberManagement: React.FC = () => {
           columnDefs={columnDefs} 
           pagination 
           paginationPageSize={10}
+          paginationPageSizeSelector={[10, 20, 50, 100]}
           overlayLoadingTemplate={loading ? '<span class="ag-overlay-loading-center">Loading...</span>' : ''}
-          overlayNoRowsTemplate='<span style="padding: 10px; border: 2px solid #444; background: lightgoldenrodyellow;">No members found</span>'
         />
       </div>
 

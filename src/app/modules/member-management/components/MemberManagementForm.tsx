@@ -2,9 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Member } from '../types/MemberManagement.types';
 import { useSelector } from 'react-redux';
 import { selectBranches } from '../../master-record/redux/masterRecordSlice';
-import AnimatedInput from '../../../shared/components/AnimatedInput';
-import AnimatedSelect from '../../../shared/components/AnimatedSelect';
-import AnimatedTextarea from '../../../shared/components/AnimatedTextarea';
 
 interface Props {
   member: Member | null;
@@ -50,140 +47,234 @@ const MemberManagementForm: React.FC<Props> = ({ member, onSubmit, onClose, load
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg w-full max-w-lg">
-        <h2 className="text-xl font-bold mb-4">{member ? 'Edit Member' : 'Add New Member'}</h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <AnimatedInput
-            id="employeeId"
-            name="employeeId"
-            label="Employee ID"
-            value={form.employeeId}
-            onChange={handleChange}
-            required
-            disabled={!!member || isViewer}
-          />
-          
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-lg">
+          <h2 className="text-xl font-bold text-gray-800">
+            {member ? (isViewer ? 'View Member' : 'Edit Member') : 'Add New Member'}
+          </h2>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <div>
+            <label htmlFor="employeeId" className="block text-sm font-medium text-gray-700 mb-2">
+              Employee ID <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="employeeId"
+              name="employeeId"
+              value={form.employeeId}
+              onChange={handleChange}
+              required
+              disabled={!!member || isViewer}
+              placeholder="Enter employee ID"
+              className="nbs-input w-full"
+            />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <AnimatedInput
-              id="firstName"
-              name="firstName"
-              label="First Name"
-              value={form.firstName}
+            <div>
+              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                First Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                value={form.firstName}
+                onChange={handleChange}
+                required
+                disabled={isViewer}
+                placeholder="Enter first name"
+                className="nbs-input w-full"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="middleName" className="block text-sm font-medium text-gray-700 mb-2">
+                Middle Name
+              </label>
+              <input
+                type="text"
+                id="middleName"
+                name="middleName"
+                value={form.middleName}
+                onChange={handleChange}
+                disabled={isViewer}
+                placeholder="Enter middle name"
+                className="nbs-input w-full"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                Last Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                value={form.lastName}
+                onChange={handleChange}
+                required
+                disabled={isViewer}
+                placeholder="Enter last name"
+                className="nbs-input w-full"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="branch" className="block text-sm font-medium text-gray-700 mb-2">
+                Branch <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="branch"
+                name="branch"
+                value={form.branch}
+                onChange={handleChange}
+                required
+                disabled={isViewer}
+                className="nbs-input w-full"
+              >
+                <option value="">Select branch</option>
+                {branches.map(branch => (
+                  <option key={branch.branchCode} value={branch.branchName}>
+                    {branch.branchName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="civilStatus" className="block text-sm font-medium text-gray-700 mb-2">
+                Civil Status <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="civilStatus"
+                name="civilStatus"
+                value={form.civilStatus}
+                onChange={handleChange}
+                required
+                disabled={isViewer}
+                className="nbs-input w-full"
+              >
+                <option value="">Select civil status</option>
+                <option value="Single">Single</option>
+                <option value="Married">Married</option>
+                <option value="Widowed">Widowed</option>
+                <option value="Divorced">Divorced</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                disabled={isViewer}
+                placeholder="Enter email address"
+                className="nbs-input w-full"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
+                Phone Number
+              </label>
+              <input
+                type="text"
+                id="phoneNumber"
+                name="phoneNumber"
+                value={form.phoneNumber}
+                onChange={handleChange}
+                disabled={isViewer}
+                placeholder="Enter phone number"
+                className="nbs-input w-full"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
+              Address
+            </label>
+            <textarea
+              id="address"
+              name="address"
+              value={form.address}
               onChange={handleChange}
-              required
               disabled={isViewer}
-            />
-            <AnimatedInput
-              id="middleName"
-              name="middleName"
-              label="Middle Name"
-              value={form.middleName}
-              onChange={handleChange}
-              disabled={isViewer}
-            />
-            <AnimatedInput
-              id="lastName"
-              name="lastName"
-              label="Last Name"
-              value={form.lastName}
-              onChange={handleChange}
-              required
-              disabled={isViewer}
+              placeholder="Enter complete address"
+              rows={3}
+              className="nbs-input w-full resize-none"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <AnimatedSelect
-              id="branch"
-              name="branch"
-              label="Branch"
-              value={form.branch}
-              onChange={handleChange}
-              required
-              disabled={isViewer}
-            >
-              <option value=""></option>
-              {branches.map(branch => (
-                <option key={branch.branchCode} value={branch.branchName}>{branch.branchName}</option>
-              ))}
-            </AnimatedSelect>
-            <AnimatedSelect
-              id="civilStatus"
-              name="civilStatus"
-              label="Civil Status"
-              value={form.civilStatus}
-              onChange={handleChange}
-              required
-              disabled={isViewer}
-            >
-              <option value=""></option>
-              <option value="Single">Single</option>
-              <option value="Married">Married</option>
-              <option value="Widowed">Widowed</option>
-              <option value="Divorced">Divorced</option>
-            </AnimatedSelect>
+            <div>
+              <label htmlFor="dateOfJoining" className="block text-sm font-medium text-gray-700 mb-2">
+                Date of Joining <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                id="dateOfJoining"
+                name="dateOfJoining"
+                value={form.dateOfJoining instanceof Date ? form.dateOfJoining.toISOString().split('T')[0] : form.dateOfJoining}
+                onChange={handleChange}
+                required
+                disabled={isViewer}
+                className="nbs-input w-full"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="membershipStatus" className="block text-sm font-medium text-gray-700 mb-2">
+                Membership Status <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="membershipStatus"
+                name="membershipStatus"
+                value={form.membershipStatus}
+                onChange={handleChange}
+                required
+                disabled={isViewer}
+                className="nbs-input w-full"
+              >
+                <option value="Active">Active</option>
+                <option value="Promoted">Promoted</option>
+                <option value="Resigned">Resigned</option>
+              </select>
+            </div>
           </div>
 
-          <AnimatedInput
-            id="email"
-            name="email"
-            type="email"
-            label="Email"
-            value={form.email}
-            onChange={handleChange}
-              disabled={isViewer}
-          />
-
-          <AnimatedInput
-            id="phoneNumber"
-            name="phoneNumber"
-            label="Phone Number"
-            value={form.phoneNumber}
-            onChange={handleChange}
-              disabled={isViewer}
-          />
-
-          <AnimatedTextarea
-            id="address"
-            name="address"
-            label="Address"
-            value={typeof form.address === 'string' ? form.address : ''}
-            onChange={handleChange}
-            rows={2}
-              disabled={isViewer}
-          />
-
-          <AnimatedInput
-            id="dateOfJoining"
-            name="dateOfJoining"
-            type="date"
-            label="Date of Joining"
-            value={typeof form.dateOfJoining === 'string' ? form.dateOfJoining : new Date(form.dateOfJoining).toISOString().split('T')[0]}
-            onChange={handleChange}
-            required
-              disabled={isViewer}
-          />
-
-          <AnimatedSelect
-            id="membershipStatus"
-            name="membershipStatus"
-            label="Membership Status"
-            value={form.membershipStatus}
-            onChange={handleChange}
-            required
-              disabled={isViewer}
-          >
-            <option value="Active">Active</option>
-            <option value="Promoted">Promoted</option>
-            <option value="Resigned">Resigned</option>
-          </AnimatedSelect>
-
-          <div className="flex justify-end space-x-2">
-            <button type="button" onClick={onClose} className="nbs-button-secondary" disabled={loading}>Cancel</button>
-            <button type="submit" className="nbs-button" disabled={loading || isViewer}>
-              {loading ? 'Saving...' : 'Save'}
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={onClose}
+              className="nbs-button-secondary"
+              disabled={loading}
+            >
+              Cancel
             </button>
+            {!isViewer && (
+              <button
+                type="submit"
+                className="nbs-button"
+                disabled={loading}
+              >
+                {loading ? 'Saving...' : member ? 'Update Member' : 'Add Member'}
+              </button>
+            )}
           </div>
         </form>
       </div>

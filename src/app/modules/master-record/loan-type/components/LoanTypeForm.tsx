@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { LoanType } from '../../types/MasterRecord.types';
-import AnimatedInput from '../../../../shared/components/AnimatedInput';
 
 interface LoanTypeFormProps {
     isOpen: boolean;
@@ -40,21 +39,25 @@ const LoanTypeForm: React.FC<LoanTypeFormProps> = ({ isOpen, onClose, onSubmit, 
                 <h2 className="text-2xl font-bold mb-4">{initialData ? 'Edit Loan Type' : 'Add New Loan Type'}</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
-                        <AnimatedInput
+                        <label htmlFor="loanTypeCode" className="block text-sm font-medium text-gray-700 mb-1">Loan Type Code</label>
+                        <input
+                            type='text'
                             id="loanTypeCode"
-                            label="Loan Type Code"
                             value={loanTypeCode}
                             onChange={(e) => setLoanTypeCode(e.target.value)}
+                            className="nbs-input w-full"
                             required
                             disabled={!!initialData}
                         />
                     </div>
                     <div className="mb-4">
-                        <AnimatedInput
+                        <label htmlFor="loanTypeName" className="block text-sm font-medium text-gray-700 mb-1">Loan Type</label>
+                        <input
+                            type="text"
                             id="loanTypeName"
-                            label="Loan Type"
                             value={loanTypeName}
                             onChange={(e) => setLoanType(e.target.value)}
+                            className="nbs-input w-full"
                             required
                         />
                     </div>

@@ -1,7 +1,7 @@
 
 import { api } from '../../../core/services/api.service';
 import { Member } from '../../member-management/types/MemberManagement.types';
-import { PaymentFormData } from '../types/PaymentManagement.types';
+import { BulkPaymentUploadData, BulkUploadResult, PaymentFormData } from '../types/PaymentManagement.types';
 import { Payment } from '../types/PaymentManagement.types';
 
 const createPayment = async (payment: PaymentFormData) => {
@@ -69,6 +69,16 @@ const getLoansForMember = async (employeeId: string) => {
   }
 };
 
+const bulkUploadPayments = async (payments: BulkPaymentUploadData[]): Promise<BulkUploadResult> => {
+  try {
+    const response = await api.post('/payments/bulk-upload', { payments });
+    return response.data;
+  } catch (error) {
+    console.error('Error bulk uploading payments:', error);
+    throw error;
+  }
+};
+
 export const PaymentManagementService = {
   getMembers,
   getLoansForMember,
@@ -76,4 +86,5 @@ export const PaymentManagementService = {
   createPayment,
   updatePayment,
   deletePayment,
+  bulkUploadPayments
 };

@@ -103,7 +103,7 @@ const BranchManagement: React.FC = () => {
                 <div className="flex gap-2">
                     <button
                         onClick={() => setIsBulkUploadOpen(true)}
-                        className="flex items-center gap-2 nbs-button-secondary"
+                        className="nbs-button flex items-center gap-2"
                     >
                         <UploadIcon className="w-5 h-5" /> Bulk Upload
                     </button>
@@ -129,7 +129,8 @@ const BranchManagement: React.FC = () => {
                         resizable: true,
                     }}
                     pagination={true}
-                    paginationPageSize={20}
+                    paginationPageSize={10}
+                    paginationPageSizeSelector={[10, 20, 50, 100]}
                     suppressRowClickSelection={true}
                     onGridReady={fetchBranches}
                     overlayLoadingTemplate={loading ? '<span class="ag-overlay-loading-center">Loading...</span>' : ''}

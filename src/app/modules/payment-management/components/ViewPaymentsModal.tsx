@@ -130,7 +130,8 @@ const ViewPaymentsModal: React.FC<Props> = ({ member, onClose }) => {
                             rowData={payments}
                             columnDefs={columnDefs}
                             pagination={true}
-                            paginationPageSize={20}
+                            paginationPageSize={10}
+                            paginationPageSizeSelector={[10, 20, 50, 100]}
                             suppressRowClickSelection={true}
                             overlayLoadingTemplate='<span class="ag-overlay-loading-center">Loading...</span>'
                             noRowsOverlayComponent={() => 'No payments found for this member.'}

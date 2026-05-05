@@ -134,7 +134,6 @@ const BulkUploadModal: React.FC<Props> = ({ onClose, onSuccess }) => {
         if (results.failed.length === 0) {
           setTimeout(() => {
             onSuccess();
-            onClose();
           }, 2000);
         }
       }
@@ -154,11 +153,11 @@ const BulkUploadModal: React.FC<Props> = ({ onClose, onSuccess }) => {
   const downloadTemplate = () => {
     const template = [
       {
-        'Employee ID': 'EMP001',
+        'Employee ID': '000001',
         'First Name': 'John',
         'Middle Name': 'M',
         'Last Name': 'Doe',
-        'Branch': 'Main Branch',
+        'Branch': 'Ali Mall',
         'Email': 'john.doe@example.com',
         'Phone Number': '09123456789',
         'Membership Status': 'Active',
@@ -291,7 +290,7 @@ const BulkUploadModal: React.FC<Props> = ({ onClose, onSuccess }) => {
         <div className="mb-6">
           <button
             onClick={downloadTemplate}
-            className="nbs-button-secondary"
+            className="nbs-button-secondary underline"
             disabled={isProcessing}
           >
             📥 Download Template
@@ -317,7 +316,7 @@ const BulkUploadModal: React.FC<Props> = ({ onClose, onSuccess }) => {
               disabled={!file || isProcessing}
               className="nbs-button"
             >
-              {isProcessing ? 'Processing...' : 'Parse File'}
+              {isProcessing ? 'Processing...' : 'Validate File'}
             </button>
           </div>
           {file && (
