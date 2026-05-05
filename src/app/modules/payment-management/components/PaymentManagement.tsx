@@ -277,9 +277,9 @@ const PaymentManagement: React.FC = () => {
                                 onChange={(e) => setSearchBy(e.target.value)}
                                 className="nbs-input"
                             >
-                                <option value="lastName">Last Name</option>
-                                <option value="firstName">First Name</option>
                                 <option value="employeeId">Employee ID</option>
+                                <option value="firstName">First Name</option>
+                                <option value="lastName">Last Name</option>
                             </select>
                             <div className="flex gap-2">
                                 <input
