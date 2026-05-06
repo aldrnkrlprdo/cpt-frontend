@@ -551,9 +551,7 @@ const PaymentBulkUpload: React.FC<Props> = ({ onClose, onSuccess }) => {
                                     <div
                                         className="bg-blue-600 h-3 rounded-full transition-all duration-300 ease-out"
                                         style={{ width: `${(uploadProgress.processed / uploadProgress.total) * 100}%` }}
-                                    >
-                                        {Math.round((uploadProgress.processed / uploadProgress.total) * 100)}%
-                                    </div>
+                                    />
                                 </div>
                             </div>
                             <div className="flex justify-between text-xs text-gray-500 mt-2">
