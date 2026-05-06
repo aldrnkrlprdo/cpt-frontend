@@ -19,7 +19,7 @@ const PaymentBulkUpload: React.FC<Props> = ({ onClose, onSuccess }) => {
     const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
     const [parsedPayments, setParsedPayments] = useState<ParsedPayment[]>([]);
     const [showPreview, setShowPreview] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState({ total: 0, processed: 0, successful: 0, failed: 0 });
+    const [uploadProgress, setUploadProgress] = useState({ total: 0, processed: 0, success: 0, failed: 0 });
     const [showResults, setShowResults] = useState(false);
     const [uploadResults, setUploadResults] = useState<BulkUploadResult | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -177,7 +177,7 @@ const PaymentBulkUpload: React.FC<Props> = ({ onClose, onSuccess }) => {
         setUploadProgress({
             total: parsedPayments.length,
             processed: 0,
-            successful: 0,
+            success: 0,
             failed: 0
         });
 
@@ -197,13 +197,8 @@ const PaymentBulkUpload: React.FC<Props> = ({ onClose, onSuccess }) => {
             // Simulate progress updates
             setUploadProgress(prev => ({ ...prev, processed: Math.floor(prev.total * 0.3) }));
 
-            const result = await PaymentManagementService.bulkUploadPayments(paymentsData);
-
-            setUploadProgress({
-                total: parsedPayments.length,
-                processed: parsedPayments.length,
-                successful: result.success,
-                failed: result.failed
+            const result = await PaymentManagementService.bulkUploadPayments(paymentsData, (progress) => {
+                setUploadProgress(progress);
             });
 
             setUploadResults(result);
@@ -323,7 +318,7 @@ const PaymentBulkUpload: React.FC<Props> = ({ onClose, onSuccess }) => {
         setShowPreview(false);
         setParsedPayments([]);
         setValidationErrors([]);
-        setUploadProgress({ total: 0, processed: 0, successful: 0, failed: 0 });
+        setUploadProgress({ total: 0, processed: 0, success: 0, failed: 0 });
         setUploadResults(null);
         setFile(null);
         setUploading(false);
@@ -437,7 +432,7 @@ const PaymentBulkUpload: React.FC<Props> = ({ onClose, onSuccess }) => {
                                     {showResults ? 'Upload Status' : 'Ready to Upload'}
                                 </div>
                                 <div className="text-3xl font-bold text-purple-600">
-                                    {showResults ? `${uploadProgress.successful}/${uploadProgress.total}` : '✓'}
+                                    {showResults ? `${uploadProgress.success}/${uploadProgress.total}` : '✓'}
                                 </div>
                             </div>
                         </div>
@@ -556,7 +551,9 @@ const PaymentBulkUpload: React.FC<Props> = ({ onClose, onSuccess }) => {
                                     <div
                                         className="bg-blue-600 h-3 rounded-full transition-all duration-300 ease-out"
                                         style={{ width: `${(uploadProgress.processed / uploadProgress.total) * 100}%` }}
-                                    />
+                                    >
+                                        {Math.round((uploadProgress.processed / uploadProgress.total) * 100)}%
+                                    </div>
                                 </div>
                             </div>
                             <div className="flex justify-between text-xs text-gray-500 mt-2">

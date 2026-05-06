@@ -69,5 +69,10 @@ export interface BulkUploadError {
 export interface BulkUploadResult {
     success: number;
     failed: number;
-    errors: BulkUploadError[];
+    errors: any[];
+}
+
+export interface ProgressUploadResult extends BulkUploadResult {
+    total: number;
+    processed: number;
 }

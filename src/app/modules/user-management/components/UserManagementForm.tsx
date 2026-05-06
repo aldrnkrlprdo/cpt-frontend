@@ -28,7 +28,6 @@ const UserManagementForm: React.FC<Props> = ({ user, onSubmit, onClose, loading 
 
   useEffect(() => {
     if (user) {
-      console.log('UserManagementForm: user is defined ', user, user.id);
       setForm({
         id: user.id,
         firstName: user.firstName,

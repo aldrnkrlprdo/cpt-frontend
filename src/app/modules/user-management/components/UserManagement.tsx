@@ -107,7 +107,6 @@ const UserManagement: React.FC = () => {
 
     const handleEdit = (user: User) => {
         if (!isAdmin) return;
-        console.log('Edit user:', user);
         setSelectedUser(user);
         setIsModalOpen(true);
     };
@@ -133,7 +132,6 @@ const UserManagement: React.FC = () => {
     const handleSubmit = async (userData: Omit<User, 'dateCreated'>) => {
         if (!isAdmin) return;
         
-        console.log('Submit user:', userData);
         try {
             setLoading(true);
             if (selectedUser) {
