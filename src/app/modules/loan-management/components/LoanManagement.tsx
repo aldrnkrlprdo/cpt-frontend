@@ -316,7 +316,7 @@ const LoanManagement: React.FC = () => {
                                 columnDefs={memberColumnDefs}
                                 defaultColDef={{ sortable: true, filter: true, resizable: true }}
                                 pagination={true}
-                                paginationPageSize={20}
+                                paginationPageSize={10}
                                 paginationPageSizeSelector={[10, 20, 50, 100]}
                                 suppressRowClickSelection={true}
                                 overlayLoadingTemplate='<span class="ag-overlay-loading-center">Please wait while your rows are loading</span>'
