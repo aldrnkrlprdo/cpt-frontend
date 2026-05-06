@@ -26,7 +26,7 @@ const MemberManagement: React.FC = () => {
     setLoading(true);
     try {
       const data = await MemberManagementService.getMembers();
-      setMembers(data);
+      setMembers(data.sort((a, b) => a.employeeId.localeCompare(b.employeeId)));
     } catch (err) {
       toast.error('Failed to fetch members');
     } finally {
