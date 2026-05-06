@@ -84,8 +84,6 @@ export const bulkUploadPayments = async (
     errors: []
   };
 
-  const totalBatches = Math.ceil(payments.length / BATCH_SIZE);
-
   for (let i = 0; i < payments.length; i += BATCH_SIZE) {
     const batch = payments.slice(i, i + BATCH_SIZE);
     const currentBatch = Math.floor(i / BATCH_SIZE) + 1;
@@ -109,7 +107,6 @@ export const bulkUploadPayments = async (
         });
       }
 
-      console.log(`Batch ${currentBatch}/${totalBatches} completed`);
     } catch (error: any) {
       console.error(`Batch ${currentBatch} failed:`, error);
       

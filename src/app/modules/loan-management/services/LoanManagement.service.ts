@@ -49,8 +49,6 @@ export const LoanManagementService = {
       message: "Batch upload started",
     };
 
-    const totalBatches = Math.ceil(loans.length / BATCH_SIZE);
-
     for (let i = 0; i < loans.length; i += BATCH_SIZE) {
       const batch = loans.slice(i, i + BATCH_SIZE);
       const currentBatch = Math.floor(i / BATCH_SIZE) + 1;
@@ -74,7 +72,6 @@ export const LoanManagementService = {
             message: "Batch upload completed"
           });
         }
-        console.log(`Batch ${currentBatch}/${totalBatches} completed`);
       } catch (err: any) {
         console.error(`Batch ${currentBatch} failed:`, err);
         aggregatedResults.processed += batch.length;
