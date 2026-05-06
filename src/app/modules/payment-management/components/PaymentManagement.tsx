@@ -27,7 +27,7 @@ const PaymentManagement: React.FC = () => {
     const [showBulkUploadModal, setShowBulkUploadModal] = useState(false);
 
     const mountedRef = useRef(true);
-    const [searchBy, setSearchBy] = useState('lastName');
+    const [searchBy, setSearchBy] = useState('employeeId');
     const [searchText, setSearchText] = useState('');
 
     const loanTypes = useSelector(selectLoanTypes);
@@ -186,7 +186,7 @@ const PaymentManagement: React.FC = () => {
         { headerName: 'Employee ID', field: 'employeeId', sortable: true, filter: true, width: 120 },
         {
             headerName: 'Full Name',
-            valueGetter: (params) => `${params.data.firstName} ${params.data.middleName || ''} ${params.data.lastName}`.trim(),
+            valueGetter: (params) => `${params.data.lastName}, ${params.data.firstName} ${params.data.middleName || ''}`.trim(),
             sortable: true,
             filter: true,
             flex: 1,

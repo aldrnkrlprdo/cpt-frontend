@@ -41,9 +41,15 @@ const getCapitalShareReportData = async () => {
   }
 };
 
+const generateScheduleOfAccounts = async (startYear: number, endYear: number, format: string): Promise<Blob> => {
+    const response = await api.post('/reports/schedule-of-accounts', { startYear, endYear, format }, { responseType: 'blob' });
+    return response.data;
+  }
+
 export const ReportService = {
   getLoanReportData,
   getMemberReportData,
   getPaymentReportData,
   getCapitalShareReportData,
+  generateScheduleOfAccounts,
 };

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { ReportService } from '../services/Report.service';
 import { toast } from 'react-toastify';
+import ScheduleOfAccountsModal from './ScheduleOfAccountsModal';
 
-type ReportType = 'loan' | 'member' | 'payment' | 'capital';
+type ReportType = 'loan' | 'member' | 'payment' | 'capital' | 'scheduleOfAccounts';
 
 const ReportsPage: React.FC = () => {
   const [loading, setLoading] = useState({
@@ -10,31 +11,49 @@ const ReportsPage: React.FC = () => {
     member: false,
     payment: false,
     capital: false,
+    scheduleOfAccounts: false,
   });
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleGenerateReport = async (reportType: ReportType) => {
+  const handleGenerateReport = async (reportType: ReportType, options?: { startYear?: number; endYear?: number; format?: 'excel' | 'pdf' }) => {
     setLoading(prev => ({ ...prev, [reportType]: true }));
-    
+
     try {
       let blob: Blob;
       let fileNamePrefix: string;
+      let downloadFileName: string;
+      const today = new Date().toISOString().split('T')[0];
 
       switch (reportType) {
         case 'loan':
           blob = await ReportService.getLoanReportData();
           fileNamePrefix = 'Loan_Report';
+          downloadFileName = `${fileNamePrefix}_${today}.xlsx`;
           break;
         case 'member':
           blob = await ReportService.getMemberReportData();
           fileNamePrefix = 'Member_Report';
+          downloadFileName = `${fileNamePrefix}_${today}.xlsx`;
           break;
         case 'payment':
           blob = await ReportService.getPaymentReportData();
           fileNamePrefix = 'Payment_Report';
+          downloadFileName = `${fileNamePrefix}_${today}.xlsx`;
           break;
         case 'capital':
           blob = await ReportService.getCapitalShareReportData();
           fileNamePrefix = 'Capital_Share_Report';
+          downloadFileName = `${fileNamePrefix}_${today}.xlsx`;
+          break;
+        case 'scheduleOfAccounts':
+          if (!options?.startYear || !options?.endYear || !options?.format) {
+            toast.error('Start year, end year, and format are required for this report.');
+            return;
+          }
+          blob = await ReportService.generateScheduleOfAccounts(options.startYear, options.endYear, options.format);
+          fileNamePrefix = 'Schedule_of_Accounts';
+          downloadFileName = `${fileNamePrefix}_${options.startYear}-${options.endYear}_${today}.${options.format === 'pdf' ? 'pdf' : 'xlsx'}`;
+          setIsModalOpen(false);
           break;
         default:
           toast.error('Invalid report type specified.');
@@ -51,11 +70,10 @@ const ReportsPage: React.FC = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      const today = new Date().toISOString().split('T')[0];
-      a.download = `${fileNamePrefix}_${today}.xlsx`;
+      a.download = downloadFileName;
       document.body.appendChild(a);
       a.click();
-      
+
       // Clean up
       a.remove();
       window.URL.revokeObjectURL(url);
@@ -73,7 +91,7 @@ const ReportsPage: React.FC = () => {
     <div className="p-4 md:p-6">
       <h1 className="text-2xl font-bold mb-6">Generate Reports</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        
+
         {/* Loan Report Card */}
         <div className="bg-white p-6 rounded-lg shadow-md flex flex-col">
           <h2 className="text-lg font-bold mb-2">Loan Report</h2>
@@ -110,7 +128,27 @@ const ReportsPage: React.FC = () => {
           </button>
         </div>
 
+        {/* Schedule of Accounts Report Card */}
+        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col">
+          <h2 className="text-lg font-bold mb-2">Schedule of Accounts</h2>
+          <p className="text-gray-600 text-sm mb-4 flex-grow">
+            Generate a schedule of accounts report for a specified year range.
+          </p>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="nbs-button w-full mt-auto"
+            disabled={loading.scheduleOfAccounts}
+          >
+            {loading.scheduleOfAccounts ? 'Generating...' : 'Generate Schedule'}
+          </button>
+        </div>
       </div>
+      <ScheduleOfAccountsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={(startYear, endYear, format) => handleGenerateReport('scheduleOfAccounts', { startYear, endYear, format })}
+        loading={loading.scheduleOfAccounts}
+      />
     </div>
   );
 };
