@@ -50,27 +50,32 @@ export interface BulkUploadError {
 }
 
 export interface ValidationError {
-    row: number;
-    message: string;
-    loanId?: string;
-    employeeId?: string;
-    errors?: string[];
+  row: number;
+  message: string;
+  loanId?: string;
+  employeeId?: string;
+  errors?: string[];
 }
 
 export interface ParsedLoan {
-    loanId: string;
-    employeeId: string;
-    branch: string;
-    loanType: string;
-    loanDate: string;
-    loanAmount: number;
-    maturityDate: string;
-    loanTerm: number;
-    interest: number;
-    principalBalance?: number;
-    interestBalance?: number;
-    totalBalance?: number;
-    amountPaid?: number;
-    status?: string;
-    notes?: string;
+  loanId: string;
+  employeeId: string;
+  branch: string;
+  loanType: string;
+  loanDate: string;
+  loanAmount: number;
+  maturityDate: string;
+  loanTerm: number;
+  interest: number;
+  principalBalance?: number;
+  interestBalance?: number;
+  totalBalance?: number;
+  amountPaid?: number;
+  status?: string;
+  notes?: string;
+}
+
+export interface ProgressUploadResult extends BulkUploadResult {
+  total: number;
+  processed: number;
 }

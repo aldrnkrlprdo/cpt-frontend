@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { DownloadIcon, XIcon } from '../../../shared/components/icons';
 import { LoanManagementService } from '../services/LoanManagement.service';
 import { toast } from 'react-toastify';
-import { ValidationError, ParsedLoan, BulkLoanUploadData, BulkUploadResult, BulkUploadError } from '../types/LoanManagement.types';
+import { ValidationError, ParsedLoan, BulkLoanUploadData, BulkUploadResult, BulkUploadError, ProgressUploadResult } from '../types/LoanManagement.types';
 import * as XLSX from 'xlsx';
 import { useSelector } from 'react-redux';
 import { selectLoanTypes } from '../../master-record/redux/masterRecordSlice';
@@ -18,7 +18,14 @@ const LoanBulkUpload: React.FC<Props> = ({ onClose, onSuccess }) => {
     const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
     const [parsedLoans, setParsedLoans] = useState<ParsedLoan[]>([]);
     const [showPreview, setShowPreview] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState({ total: 0, processed: 0, successful: 0, failed: 0 });
+    const [uploadProgress, setUploadProgress] = useState<ProgressUploadResult>({
+        total: 0,
+        processed: 0,
+        successCount: 0,
+        failedCount: 0,
+        failed: [],
+        message: '',
+    });
     const [showResults, setShowResults] = useState(false);
     const [uploadResults, setUploadResults] = useState<BulkUploadResult | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -221,8 +228,10 @@ const LoanBulkUpload: React.FC<Props> = ({ onClose, onSuccess }) => {
         setUploadProgress({
             total: parsedLoans.length,
             processed: 0,
-            successful: 0,
-            failed: 0
+            successCount: 0,
+            failedCount: 0,
+            failed: [],
+            message: '',
         });
 
         try {
@@ -244,16 +253,8 @@ const LoanBulkUpload: React.FC<Props> = ({ onClose, onSuccess }) => {
                 notes: loan.notes
             }));
 
-            // Simulate progress updates
-            setUploadProgress(prev => ({ ...prev, processed: Math.floor(prev.total * 0.3) }));
-
-            const result = await LoanManagementService.bulkUploadLoans(loansData);
-
-            setUploadProgress({
-                total: parsedLoans.length,
-                processed: parsedLoans.length,
-                successful: result.successCount,
-                failed: result.failedCount
+            const result = await LoanManagementService.bulkUploadLoans(loansData, (progress) => {
+                setUploadProgress(progress);
             });
 
             setUploadResults(result);
@@ -377,7 +378,14 @@ const LoanBulkUpload: React.FC<Props> = ({ onClose, onSuccess }) => {
         setShowPreview(false);
         setParsedLoans([]);
         setValidationErrors([]);
-        setUploadProgress({ total: 0, processed: 0, successful: 0, failed: 0 });
+        setUploadProgress({
+            total: parsedLoans.length,
+            processed: 0,
+            successCount: 0,
+            failedCount: 0,
+            failed: [],
+            message: '',
+        });
         setUploadResults(null);
         setFile(null);
         setUploading(false);
@@ -491,7 +499,7 @@ const LoanBulkUpload: React.FC<Props> = ({ onClose, onSuccess }) => {
                                     {showResults ? 'Upload Status' : 'Ready to Upload'}
                                 </div>
                                 <div className="text-3xl font-bold text-purple-600">
-                                    {showResults ? `${uploadProgress.successful}/${uploadProgress.total}` : '✓'}
+                                    {showResults ? `${uploadProgress?.successCount}/${uploadProgress?.total}` : '✓'}
                                 </div>
                             </div>
                         </div>

@@ -46,12 +46,4 @@ export const MasterRecordService = {
     const resp = await api.post(`${BRANCH_BASE}/bulk`, { branches });
     return resp.data;
   },
-
-  validateBulkBranches: async (branches: Partial<Branch>[]): Promise<{
-    valid: Partial<Branch>[],
-    invalid: { member: Partial<Branch>, errors: string[] }[]
-  }> => {
-    const resp = await api.post(`${BRANCH_BASE}/bulk/validate`, { branches });
-    return resp.data;
-  }
 };

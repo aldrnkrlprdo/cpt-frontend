@@ -34,14 +34,6 @@ const bulkUploadMembers = async (members: Partial<Member>[]): Promise<{
   return resp.data;
 };
 
-const validateBulkUpload = async (members: Partial<Member>[]): Promise<{
-  valid: Partial<Member>[],
-  invalid: { member: Partial<Member>, errors: string[] }[]
-}> => {
-  const resp = await api.post('/members/bulk/validate', { members });
-  return resp.data;
-};
-
 export const MemberManagementService = {
   getMembers,
   getMemberById,
@@ -49,5 +41,4 @@ export const MemberManagementService = {
   updateMember,
   deleteMember,
   bulkUploadMembers,
-  validateBulkUpload,
 };

@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { Member } from '../types/MemberManagement.types';
 import { MemberManagementService } from '../services/MemberManagement.service';
 import * as XLSX from 'xlsx';
+import { DownloadIcon } from '../../../shared/components/icons';
 
 interface Props {
   onClose: () => void;
@@ -30,6 +31,15 @@ const BulkUploadModal: React.FC<Props> = ({ onClose, onSuccess }) => {
   } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+
+  const clearUpload = () => {
+    setFile(null);
+    setParsedData([]);
+    setValidationResults(null);
+    setUploadResults(null);
+    setShowResults(false);
+  }
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
@@ -41,7 +51,9 @@ const BulkUploadModal: React.FC<Props> = ({ onClose, onSuccess }) => {
       setFile(selectedFile);
       setParsedData([]);
       setValidationResults(null);
+      setUploadResults(null);
       setShowResults(false);
+      setUploadProgress({ total: 0, processed: 0, successful: 0, failed: 0 });
     }
   };
 
@@ -71,10 +83,10 @@ const BulkUploadModal: React.FC<Props> = ({ onClose, onSuccess }) => {
       }));
 
       setParsedData(parsed);
-      
+
       // Validate the parsed data
       await validateData(parsed);
-      
+
       toast.success(`Successfully parsed ${parsed.length} records`);
     } catch (error) {
       console.error('Error parsing file:', error);
@@ -85,22 +97,134 @@ const BulkUploadModal: React.FC<Props> = ({ onClose, onSuccess }) => {
   };
 
   const validateData = async (data: ParsedMember[]) => {
-    setIsProcessing(true);
-    try {
-      const results = await MemberManagementService.validateBulkUpload(data);
-      setValidationResults({
-        valid: results.valid as ParsedMember[],
-        invalid: results.invalid.map(item => ({
-          ...item,
-          member: item.member as ParsedMember
-        }))
-      });
-    } catch (error) {
-      console.error('Error validating data:', error);
-      toast.error('Failed to validate data');
-    } finally {
-      setIsProcessing(false);
+    const valid: ParsedMember[] = [];
+    const invalid: { member: ParsedMember; errors: string[] }[] = [];
+
+    // Email tracking for duplicates within the file
+    const emailsInFile = new Set<string>();
+    const employeeIdsInFile = new Set<string>();
+
+    for (const member of data) {
+      const errors: string[] = [];
+
+      // Validate required fields
+      if (!member.firstName || member.firstName.trim() === '') {
+        errors.push('First name is required');
+      }
+      if (!member.lastName || member.lastName.trim() === '') {
+        errors.push('Last name is required');
+      }
+      if (!member.employeeId || member.employeeId.trim() === '') {
+        errors.push('Employee ID is required');
+      }
+      if (!member.branch || member.branch.trim() === '') {
+        errors.push('Branch is required');
+      }
+
+      // Validate email format if provided
+      if (member.email && member.email.trim() !== '') {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(member.email)) {
+          errors.push('Invalid email format');
+        }
+
+        // Check for duplicate emails within the file
+        if (emailsInFile.has(member.email.toLowerCase())) {
+          errors.push('Duplicate email found in upload file');
+        } else {
+          emailsInFile.add(member.email.toLowerCase());
+        }
+      }
+
+      // Validate employeeId for duplicates
+      if (member.employeeId && member.employeeId.trim() !== '') {
+        // Check for duplicate employee IDs within the file
+        if (employeeIdsInFile.has(member.employeeId)) {
+          errors.push('Duplicate Employee ID found in upload file');
+        } else {
+          employeeIdsInFile.add(member.employeeId);
+        }
+      }
+
+      // Validate phone number format if provided
+      if (member.phoneNumber && member.phoneNumber.trim() !== '') {
+        const phoneRegex = /^[0-9+\-\s()]+$/;
+        if (!phoneRegex.test(member.phoneNumber)) {
+          errors.push('Invalid phone number format');
+        }
+        // Validate minimum length
+        const digitsOnly = member.phoneNumber.replace(/\D/g, '');
+        if (digitsOnly.length < 10) {
+          errors.push('Phone number must have at least 10 digits');
+        }
+      }
+
+      // Validate membership status
+      const validStatuses = ['Active', 'Resigned', 'Promoted'];
+      if (member.membershipStatus && !validStatuses.includes(member.membershipStatus)) {
+        errors.push(`Invalid membership status. Must be one of: ${validStatuses.join(', ')}`);
+      }
+
+      // Validate civil status
+      const validCivilStatuses = ['Single', 'Married', 'Widowed', 'Divorced', 'Separated'];
+      if (member.civilStatus && !validCivilStatuses.includes(member.civilStatus)) {
+        errors.push(`Invalid civil status. Must be one of: ${validCivilStatuses.join(', ')}`);
+      }
+
+      // Validate date format if provided
+      if (member.dateOfJoining) {
+        const dateStr = typeof member.dateOfJoining === 'string'
+          ? member.dateOfJoining
+          : member.dateOfJoining.toISOString().split('T')[0];
+
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!dateRegex.test(dateStr)) {
+          errors.push('Date of joining must be in YYYY-MM-DD format');
+        } else {
+          const date = new Date(dateStr);
+          if (isNaN(date.getTime())) {
+            errors.push('Invalid date of joining');
+          } else {
+            // Check if date is not in the future
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (date > today) {
+              errors.push('Date of joining cannot be in the future');
+            }
+          }
+        }
+      }
+
+      // Validate name fields don't contain numbers or special characters
+      const nameRegex = /^[a-zA-Z\s\-'.]+$/;
+      if (member.firstName && !nameRegex.test(member.firstName)) {
+        errors.push('First name can only contain letters, spaces, hyphens, apostrophes, and periods');
+      }
+      if (member.middleName && member.middleName.trim() !== '' && !nameRegex.test(member.middleName)) {
+        errors.push('Middle name can only contain letters, spaces, hyphens, apostrophes, and periods');
+      }
+      if (member.lastName && !nameRegex.test(member.lastName)) {
+        errors.push('Last name can only contain letters, spaces, hyphens, apostrophes, and periods');
+      }
+
+      // Validate address length if provided
+      if (member.address && member.address.trim() !== '') {
+        if (member.address.length < 5) {
+          errors.push('Address must be at least 5 characters long');
+        }
+        if (member.address.length > 200) {
+          errors.push('Address must not exceed 200 characters');
+        }
+      }
+
+      if (errors.length > 0) {
+        invalid.push({ member, errors });
+      } else {
+        valid.push(member);
+      }
     }
+
+    setValidationResults({ valid, invalid });
   };
 
   const handleUpload = async () => {
@@ -117,39 +241,99 @@ const BulkUploadModal: React.FC<Props> = ({ onClose, onSuccess }) => {
       failed: 0
     });
 
+    const BATCH_SIZE = 50; // Process 50 records at a time
+    const batches: ParsedMember[][] = [];
+
+    // Split valid records into batches
+    for (let i = 0; i < validationResults.valid.length; i += BATCH_SIZE) {
+      batches.push(validationResults.valid.slice(i, i + BATCH_SIZE));
+    }
+
+    const allSuccessful: Member[] = [];
+    const allFailed: { member: Partial<Member>; error: string }[] = [];
+
     try {
-      const results = await MemberManagementService.bulkUploadMembers(validationResults.valid);
-      
-      setUploadResults(results);
+      // Process each batch sequentially
+      for (let i = 0; i < batches.length; i++) {
+        const batch = batches[i];
+
+        try {
+          const batchResults = await MemberManagementService.bulkUploadMembers(batch);
+
+          allSuccessful.push(...batchResults.success);
+          allFailed.push(...batchResults.failed);
+
+          // Update progress
+          setUploadProgress(prev => ({
+            ...prev,
+            processed: Math.min(prev.total, (i + 1) * BATCH_SIZE),
+            successful: allSuccessful.length,
+            failed: allFailed.length
+          }));
+
+          // Small delay between batches to prevent overwhelming the server
+          if (i < batches.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+        } catch (error) {
+          console.error(`Error processing batch ${i + 1}:`, error);
+          // Mark remaining items in this batch as failed
+          batch.forEach(member => {
+            allFailed.push({
+              member,
+              error: 'Batch processing failed'
+            });
+          });
+        }
+      }
+
+      // Set final results
+      setUploadResults({
+        success: allSuccessful,
+        failed: allFailed
+      });
+
       setUploadProgress({
         total: validationResults.valid.length,
         processed: validationResults.valid.length,
-        successful: results.success.length,
-        failed: results.failed.length
+        successful: allSuccessful.length,
+        failed: allFailed.length
       });
+
       setShowResults(true);
 
-      if (results.success.length > 0) {
-        toast.success(`Successfully uploaded ${results.success.length} members`);
-        if (results.failed.length === 0) {
+      if (allSuccessful.length > 0) {
+        toast.success(`Successfully uploaded ${allSuccessful.length} member(s)`);
+        if (allFailed.length === 0) {
           setTimeout(() => {
             onSuccess();
           }, 2000);
         }
       }
 
-      if (results.failed.length > 0) {
-        toast.warning(`${results.failed.length} records failed to upload`);
+      if (allFailed.length > 0) {
+        toast.warning(`${allFailed.length} record(s) failed to upload`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading members:', error);
-      toast.error('Failed to upload members');
+      toast.error(error.response?.data?.message || 'Failed to upload members');
     } finally {
       setIsProcessing(false);
     }
   };
 
-  
+  const handleNewUpload = () => {
+    setFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    setParsedData([]);
+    setValidationResults(null);
+    setUploadResults(null);
+    setShowResults(false);
+    setUploadProgress({ total: 0, processed: 0, successful: 0, failed: 0 });
+  };
+
   const downloadTemplate = () => {
     const template = [
       {
@@ -168,13 +352,13 @@ const BulkUploadModal: React.FC<Props> = ({ onClose, onSuccess }) => {
     ];
 
     const ws = XLSX.utils.json_to_sheet(template);
-    
+
     // Make header row bold
     const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
     for (let col = range.s.c; col <= range.e.c; col++) {
       const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
       if (!ws[cellAddress]) continue;
-      
+
       ws[cellAddress].s = {
         font: {
           bold: true,
@@ -211,53 +395,49 @@ const BulkUploadModal: React.FC<Props> = ({ onClose, onSuccess }) => {
     toast.success('Template downloaded successfully');
   };
 
-  const downloadErrors = () => {
-    if (!validationResults?.invalid || validationResults.invalid.length === 0) return;
+  const downloadErrorReport = () => {
+    if (!validationResults?.invalid || validationResults.invalid.length === 0) {
+      toast.warning('No validation errors to download');
+      return;
+    }
 
     const errorData = validationResults.invalid.map(item => ({
-      'Row Number': item.member.rowNumber,
-      'Employee ID': item.member.employeeId,
-      'First Name': item.member.firstName,
-      'Last Name': item.member.lastName,
-      'Errors': item.errors.join('; ')
+      'Row': item.member.rowNumber || '-',
+      'Employee ID': item.member.employeeId || '-',
+      'First Name': item.member.firstName || '-',
+      'Middle Name': item.member.middleName || '-',
+      'Last Name': item.member.lastName || '-',
+      'Branch': item.member.branch || '-',
+      'Email': item.member.email || '-',
+      'Phone Number': item.member.phoneNumber || '-',
+      'Membership Status': item.member.membershipStatus || '-',
+      'Civil Status': item.member.civilStatus || '-',
+      'Date of Joining': item.member.dateOfJoining?.toString() || '-',
+      'Errors': Array.isArray(item.errors) ? item.errors.join('; ') : item.errors
     }));
 
     const ws = XLSX.utils.json_to_sheet(errorData);
-    
-    // Make header row bold
-    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
-    for (let col = range.s.c; col <= range.e.c; col++) {
-      const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-      if (!ws[cellAddress]) continue;
-      
-      ws[cellAddress].s = {
-        font: {
-          bold: true,
-          sz: 12
-        },
-        fill: {
-          fgColor: { rgb: "C00000" }
-        },
-        alignment: {
-          horizontal: "center",
-          vertical: "center"
-        }
-      };
-    }
 
     // Set column widths
     ws['!cols'] = [
-      { wch: 12 }, // Row Number
-      { wch: 15 }, // Employee ID
-      { wch: 15 }, // First Name
-      { wch: 15 }, // Last Name
-      { wch: 50 }  // Errors
+      { wch: 8 },   // Row
+      { wch: 15 },  // Employee ID
+      { wch: 15 },  // First Name
+      { wch: 15 },  // Middle Name
+      { wch: 15 },  // Last Name
+      { wch: 20 },  // Branch
+      { wch: 25 },  // Email
+      { wch: 15 },  // Phone Number
+      { wch: 18 },  // Membership Status
+      { wch: 15 },  // Civil Status
+      { wch: 15 },  // Date of Joining
+      { wch: 60 }   // Errors
     ];
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Validation Errors');
-    XLSX.writeFile(wb, 'validation_errors.xlsx', { cellStyles: true });
-    toast.success('Error report downloaded');
+    XLSX.writeFile(wb, 'member_validation_errors.xlsx');
+    toast.success('Error report downloaded successfully');
   };
 
   return (
@@ -265,7 +445,7 @@ const BulkUploadModal: React.FC<Props> = ({ onClose, onSuccess }) => {
       <div className="bg-white p-6 rounded-lg w-full max-w-4xl shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Bulk Upload Members</h2>
-          <button onClick={onClose} className="text-gray-600 hover:text-gray-900" disabled={isProcessing}>
+          <button onClick={() => { clearUpload(); onClose(); }} className="text-gray-600 hover:text-gray-900" disabled={isProcessing}>
             <span className="text-2xl">&times;</span>
           </button>
         </div>
@@ -329,63 +509,118 @@ const BulkUploadModal: React.FC<Props> = ({ onClose, onSuccess }) => {
         {/* Validation Results */}
         {validationResults && (
           <div className="mb-6">
-            <div className="grid grid-cols-3 gap-4 mb-4">
-              <div className="p-4 bg-green-50 rounded-lg">
-                <p className="text-sm text-gray-600">Valid Records</p>
-                <p className="text-2xl font-bold text-green-600">{validationResults.valid.length}</p>
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="text-sm text-blue-700 font-medium mb-1">Total Records</div>
+                <div className="text-3xl font-bold text-blue-600">{parsedData.length + validationResults.invalid.length}</div>
               </div>
-              <div className="p-4 bg-red-50 rounded-lg">
-                <p className="text-sm text-gray-600">Invalid Records</p>
-                <p className="text-2xl font-bold text-red-600">{validationResults.invalid.length}</p>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="text-sm text-green-700 font-medium mb-1">Valid Records</div>
+                <div className="text-3xl font-bold text-green-600">{parsedData.length}</div>
               </div>
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <p className="text-sm text-gray-600">Total Records</p>
-                <p className="text-2xl font-bold text-blue-600">{parsedData.length}</p>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="text-sm text-red-700 font-medium mb-1">Invalid Records</div>
+                <div className="text-3xl font-bold text-red-600">{validationResults.invalid.length}</div>
+              </div>
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                <div className="text-sm text-purple-700 font-medium mb-1">
+                  {showResults ? 'Upload Status' : 'Ready to Upload'}
+                </div>
+                <div className="text-3xl font-bold text-purple-600">
+                  {showResults ? `${uploadProgress?.successful}/${uploadProgress?.total}` : '✓'}
+                </div>
               </div>
             </div>
 
             {/* Invalid Records Table */}
-            {validationResults.invalid.length > 0 && (
-              <div className="mb-4">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-semibold text-red-600">Validation Errors</h3>
-                  <button
-                    onClick={downloadErrors}
-                    className="text-sm text-blue-600 hover:text-blue-800"
-                  >
-                    📥 Download Error Report
-                  </button>
-                </div>
-                <div className="max-h-60 overflow-y-auto border rounded">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50 sticky top-0">
-                      <tr>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Row</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Employee ID</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Name</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Errors</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {validationResults.invalid.map((item, index) => (
-                        <tr key={index}>
-                          <td className="px-4 py-2 text-sm">{item.member.rowNumber}</td>
-                          <td className="px-4 py-2 text-sm">{item.member.employeeId}</td>
-                          <td className="px-4 py-2 text-sm">
-                            {item.member.firstName} {item.member.lastName}
-                          </td>
-                          <td className="px-4 py-2 text-sm text-red-600">
-                            <ul className="list-disc list-inside">
-                              {item.errors.map((error, errIndex) => (
-                                <li key={errIndex}>{error}</li>
-                              ))}
-                            </ul>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+            {validationResults.invalid.length > 0 && !showResults && (
+              <div className="space-y-6">
+                {/* Validation Errors */}
+                {validationResults.invalid.length > 0 && (
+                  <div className="border border-red-200 rounded-lg overflow-hidden">
+                    <div className="bg-red-50 px-4 py-3 border-b border-red-200 flex justify-between items-center">
+                      <h3 className="font-semibold text-red-900">
+                        Validation Errors ({validationResults.invalid.length})
+                      </h3>
+                      <button
+                        onClick={downloadErrorReport}
+                        className="text-sm text-red-700 hover:text-red-900 flex items-center gap-1"
+                      >
+                        <DownloadIcon className="w-4 h-4" />
+                        Download Error Report
+                      </button>
+                    </div>
+                    <div className="max-h-64 overflow-y-auto">
+                      <table className="min-w-full divide-y divide-red-200">
+                        <thead className="bg-red-50 sticky top-0">
+                          <tr>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-red-700 uppercase">Row</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-red-700 uppercase">Employee ID</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-red-700 uppercase">Name</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-red-700 uppercase">Errors</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-red-100">
+                          {validationResults.invalid.map((error, index) => (
+                            <tr key={index} className="hover:bg-red-50">
+                              <td className="px-4 py-2 text-sm text-gray-900">{error.member.rowNumber}</td>
+                              <td className="px-4 py-2 text-sm text-gray-900">{error.member.employeeId || '-'}</td>
+                              <td className="px-4 py-2 text-sm text-gray-900">{`${error.member.firstName} ${error.member.lastName}` || '-'}</td>
+                              <td className="px-4 py-2 text-sm text-red-600">
+                                {error.errors?.join('; ') || error.errors}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Valid Member Preview */}
+                {parsedData.length > 0 && (
+                  <div className="border border-green-200 rounded-lg overflow-hidden">
+                    <div className="bg-green-50 px-4 py-3 border-b border-green-200">
+                      <h3 className="font-semibold text-green-900">
+                        Valid Member Preview ({parsedData.length})
+                      </h3>
+                    </div>
+                    <div className="max-h-96 overflow-auto">
+                      <table className="min-w-full divide-y divide-green-200">
+                        <thead className="bg-green-50 sticky top-0">
+                          <tr>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-green-700 uppercase">Employee ID</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-green-700 uppercase">First Name</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-green-700 uppercase">Middle Name</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-green-700 uppercase">Last Name</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-green-700 uppercase">Branch</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-green-700 uppercase">Email</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-green-700 uppercase">Phone Number</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-green-700 uppercase">Address</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-green-700 uppercase">Status</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-green-700 uppercase">Employment Date</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-green-100">
+                          {parsedData.map((member, index) => (
+                            <tr key={index} className="hover:bg-green-50">
+                              <td className="px-4 py-2 text-sm text-gray-900">{member.employeeId}</td>
+                              <td className="px-4 py-2 text-sm text-gray-900">{member.firstName}</td>
+                              <td className="px-4 py-2 text-sm text-gray-900">{member.middleName}</td>
+                              <td className="px-4 py-2 text-sm text-gray-900">{member.lastName}</td>
+                              <td className="px-4 py-2 text-sm text-gray-900">{member.branch}</td>
+                              <td className="px-4 py-2 text-sm text-gray-900">{member.email}</td>
+                              <td className="px-4 py-2 text-sm text-gray-900">{member.phoneNumber}</td>
+                              <td className="px-4 py-2 text-sm text-gray-900">{member.address}%</td>
+                              <td className="px-4 py-2 text-sm text-gray-900">{member.membershipStatus || 'Active'}</td>
+                              <td className="px-4 py-2 text-sm text-gray-900">{member.dateOfJoining?.toString()}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -470,7 +705,7 @@ const BulkUploadModal: React.FC<Props> = ({ onClose, onSuccess }) => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {uploadResults.success.slice(0, 10).map((member, index) => (
+                      {uploadResults.success.map((member, index) => (
                         <tr key={index}>
                           <td className="px-4 py-2 text-sm">{member.employeeId}</td>
                           <td className="px-4 py-2 text-sm">
@@ -482,11 +717,6 @@ const BulkUploadModal: React.FC<Props> = ({ onClose, onSuccess }) => {
                       ))}
                     </tbody>
                   </table>
-                  {uploadResults.success.length > 10 && (
-                    <div className="p-2 text-center text-sm text-gray-500 bg-gray-50">
-                      ... and {uploadResults.success.length - 10} more
-                    </div>
-                  )}
                 </div>
               </div>
             )}
@@ -496,7 +726,7 @@ const BulkUploadModal: React.FC<Props> = ({ onClose, onSuccess }) => {
         {/* Action Buttons */}
         <div className="flex justify-end gap-2 pt-4 border-t">
           <button
-            onClick={onClose}
+            onClick={() => { clearUpload(); onClose(); }}
             className="px-4 py-2 border rounded-md hover:bg-gray-50"
             disabled={isProcessing}
           >
@@ -509,6 +739,15 @@ const BulkUploadModal: React.FC<Props> = ({ onClose, onSuccess }) => {
               disabled={isProcessing}
             >
               {isProcessing ? 'Uploading...' : `Upload ${validationResults.valid.length} Members`}
+            </button>
+          )}
+          {showResults && (
+            <button
+              onClick={handleNewUpload}
+              className="nbs-button"
+              disabled={isProcessing}
+            >
+              New Upload
             </button>
           )}
         </div>
