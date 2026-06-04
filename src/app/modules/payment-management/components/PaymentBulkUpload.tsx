@@ -112,7 +112,7 @@ const PaymentBulkUpload: React.FC<Props> = ({ onClose, onSuccess }) => {
                     payments.push({
                         employeeId: row['Employee ID'].toString().trim(),
                         loanId: row['Loan ID']?.toString().trim() || '',
-                        paymentId: row['Payment ID'].toString().trim(),
+                        paymentId: row['Payment ID']?.toString().trim() || '',
                         paymentDate: dateStr,
                         amountPaid: amount,
                         paymentType: normalizedPaymentType === '0' || normalizedPaymentType === "Contribution" ? "Contribution" : loanTypes.filter(x => x.loanTypeCode === normalizedPaymentType)[0].loanTypeName,
@@ -516,7 +516,7 @@ const PaymentBulkUpload: React.FC<Props> = ({ onClose, onSuccess }) => {
                                             <tr key={index} className="hover:bg-green-50">
                                                 <td className="px-4 py-2 text-sm text-gray-900">{payment.employeeId}</td>
                                                 <td className="px-4 py-2 text-sm text-gray-900">{payment.loanId || '-'}</td>
-                                                <td className="px-4 py-2 text-sm text-gray-900">{payment.paymentId}</td>
+                                                <td className="px-4 py-2 text-sm text-gray-900">{payment.paymentId || '-'}</td>
                                                 <td className="px-4 py-2 text-sm text-gray-900">{payment.paymentDate}</td>
                                                 <td className="px-4 py-2 text-sm text-gray-900">
                                                     ₱{payment.amountPaid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

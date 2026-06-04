@@ -117,6 +117,7 @@ const EditLoanModal: React.FC<Props> = ({ member, onClose, loanDetails, loanType
                                             <option value="" disabled>Select a status</option>
                                             <option value="Not Started">Not Started</option>
                                             <option value="In Progress">In Progress</option>
+                                            <option value="In Progress">Pending</option>
                                             <option value="Paid">Paid</option>
                                         </select>
                                     </div>
