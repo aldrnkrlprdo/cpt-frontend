@@ -57,22 +57,22 @@ const LoanManagementForm: React.FC<Props> = ({ member, loan, onSubmit, onClose, 
   }, [loanDate, loanTerm]);
 
   useEffect(() => {
-  if (loanAmount && loanTerm && interestRate) {
-    const principal = parseFloat(loanAmount);
-    const rate = parseFloat(interestRate) / 100; // monthly rate
-    const term = parseInt(loanTerm);
+    if (loanAmount && loanTerm && interestRate) {
+      const principal = parseFloat(loanAmount);
+      const rate = parseFloat(interestRate) / 100; // monthly rate
+      const term = parseInt(loanTerm);
 
-    if (principal > 0 && rate >= 0 && term > 0) {
-      const interest = principal * rate * term;
-      const total = principal + interest;
-      const monthly = total / term;
+      if (principal > 0 && rate >= 0 && term > 0) {
+        const interest = principal * rate * term;
+        const total = principal + interest;
+        const monthly = total / term;
 
-      setTotalInterest(interest);
-      setTotalPayable(total);
-      setMonthlyPayment(monthly);
+        setTotalInterest(interest);
+        setTotalPayable(total);
+        setMonthlyPayment(monthly);
+      }
     }
-  }
-}, [loanAmount, loanTerm, interestRate]);
+  }, [loanAmount, loanTerm, interestRate]);
 
   const handleLoanTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedCode = e.target.value;
@@ -285,6 +285,7 @@ const LoanManagementForm: React.FC<Props> = ({ member, loan, onSubmit, onClose, 
             >
               <option value="Not Started">Not Started</option>
               <option value="In Progress">In Progress</option>
+              <option value="Pending">Pending</option>
               <option value="Paid">Paid</option>
             </select>
           </div>
